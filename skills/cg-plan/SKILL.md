@@ -1,67 +1,159 @@
 ---
-description: Invoke when the user is planning a new feature, starting implementation, or breaking down a problem into components. Teaches widget-first decomposition before any code is written. Triggers on phrases like "I want to build", "let's implement", "how should I structure", "new project", "add capability", or any planning conversation that precedes writing code.
+description: Invoke when the user wants to plan a feature by identifying which parts should be widgets and which parts should stay as app glue. Fires on "plan this feature", "break this feature into widgets", "what widgets would I need for X", "how should I decompose Y", "what parts of this are reusable". Works per-feature, not per-app — if the user brings a whole app, narrow to one feature first. Does NOT fire once implementation has started, or for one-off fixes. Does NOT teach widget design patterns, glue gotchas, or authoring (that's widget creation, not identification). Does NOT teach the cloud layer (cg-cloud), change config (cg-config), or review proposals (cg-proposals).
 ---
 
-# cg-plan — plan implementations widget-first
+# cg-plan — identify what should be a widget
 
-Your job is to keep the user from writing logic that already exists in
-the Cartograph library, and to keep them from burying reusable logic
-inside project-specific code.
+This skill has one job: given a feature the user wants to build,
+identify which pieces should be widgets and which should stay as
+app-specific glue. The output is a roadmap, not an implementation.
 
-## Before any code is written
+It fights two failure modes at once:
+- **Under-extraction** — leaving reusable logic buried inside
+  app code because it "looks routine."
+- **Over-extraction** — promoting consumer-shaped refactors into
+  widgets when the only justification is "the current app hardcodes
+  this."
 
-1. **Name the capabilities.** Break the feature into 3-8 named
-   capabilities. Each is a verb phrase: "retry a failed HTTP call",
-   "parse a CSV into typed rows", "render a hex grid in OpenSCAD".
+If the conversation drifts into actually writing widget code, this
+skill ends. The user takes the roadmap into the widget-authoring
+flow.
 
-2. **Search for each capability.** Use `registry_widget` (search mode)
-   for each capability. Don't batch into one fuzzy query — each
-   capability deserves its own search.
+## Scope: one feature at a time
 
-3. **Classify the results:**
-   - **Exact match:** install it and plan the glue code around it.
-   - **Close match:** install it, note the gap. If the gap is a general
-     improvement (not project-specific), plan to improve the widget
-     and check it back in.
-   - **No match:** decide whether this capability belongs as a new
-     widget, or as project-specific glue. See decomposition heuristics.
+This skill plans a single feature. If the user frames the ask as a
+whole app ("help me plan this app"), narrow first:
 
-## Decomposition heuristics
+> *"A full app is too wide to decompose in one pass. Pick one
+> feature — we'll walk it, you'll see the pattern, and we can do the
+> next separately."*
 
-**Belongs as a widget:**
-- You can describe it without naming the project.
-- Another project (hypothetical or real) would use it.
-- It has a clean input/output contract.
-- It can be tested without mocking the entire project.
+Then start with that one feature. Don't compromise.
 
-**Belongs as glue (not a widget):**
-- It wires specific widgets to specific widgets in a specific order.
-- It encodes a product decision ("our app shows the banner on Tuesdays").
-- It configures a widget for this project's data shape.
+## The walk
 
-**Red flags:**
-- Widget is too large: it does more than one capability.
-  Split it. A good widget fits in one screen of code.
-- Widget is too small: it's a one-line wrapper. Don't widget-ize it;
-  the wrapper belongs in glue.
-- Leaky boundary: the widget imports project-specific config or
-  knows the name of another widget. Decouple it.
+### 1. State the feature
 
-## Picking domain and language
+One or two sentences. What it does, what the consumer is. Just
+enough to ground the next steps. Don't design yet.
 
-- Domain is required at creation time. Use the taxonomy in CLAUDE.md.
-- If the domain feels ambiguous, the widget is probably mis-scoped —
-  split it.
-- Language follows the caller. Python widgets for Python glue, etc.
-  Don't cross languages inside one widget.
+### 2. Brainstorm candidates
 
-## Output shape of the planning conversation
+List every piece of logic that could conceivably be a widget. Be
+generous — at this step the filter is off. Aim for 5–12 candidates
+for a real feature. Small things count. "Looks routine" does NOT
+disqualify at this stage.
 
-End the conversation with a plan the user can act on:
-- List of widgets to install (with widget_ids).
-- List of widgets to improve (with the planned change, one line each).
-- List of new widgets to create (with proposed `<name>` — remember
-  create_widget only needs the name, not the full widget_id).
-- List of glue files the project needs, one line each.
+### 3. Classify each candidate
 
-Only then start coding.
+Two moves per candidate. Both always apply.
+
+**The from-scratch test — a positive identifier.**
+
+Ask: *"Would a shared base implementation of this benefit from
+being iterated on across projects?"*
+
+Two signals, either one sufficient to flag as a widget candidate:
+
+- **Painful to redo.** Non-trivial logic, tricky edge cases, easy
+  to get wrong the first time. Dreading the rewrite is the
+  flag.
+- **Improves with iteration.** Each new consumer would reveal
+  better APIs, missing edge cases, or small performance wins.
+  This is often the stronger signal — it catches simple logic
+  that's still worth centralizing because it hardens through use.
+
+This test fights under-extraction. It catches logic hiding in
+what looks like app-specific code. Things that feel like ordinary
+business logic often contain the real work: retry semantics,
+pagination, dedup, validation, auth flows, formatting rules.
+
+**The consumer-shape red flag — a disqualifier.**
+
+If the only justification for making this a widget is *"the
+current app hardcodes it"* or *"this bit of the current consumer
+should be factored out," that's consumer reasoning, not
+domain reasoning. Kill the candidate. It can be refactored
+in-place without becoming a widget.
+
+A second form of the same red flag: small patterns composited
+into a bigger-sounding abstraction to make them pass the
+from-scratch test. The composite has to pass on its own. If
+it only passes as a bundle, the bundle isn't real.
+
+Both moves run on every candidate. A candidate survives if the
+from-scratch test says yes AND the red flag doesn't trip.
+
+### 4. Search the library (informational)
+
+For each survivor, search the library once: `registry_widget`
+and/or `installed_widget` with 2–3 terms drawn from the candidate's
+generic framing. Not a gate — information.
+
+Three outcomes per survivor:
+- **Already covered** → install the existing widget, no new work.
+- **Partial match** → improve the existing widget (closer look at
+  the gap). If the gap is genuinely app-specific, that part stays
+  in glue.
+- **Needs creation** → new widget, framed generically.
+
+Descriptions stand alone — when you check matches, judge them on
+their own text. Don't rely on name-adjacency.
+
+### 5. Deliver the roadmap
+
+Four buckets for the feature:
+
+- **install** — existing widgets to install as-is.
+- **improve** — existing widgets to extend, with a one-line note
+  on the gap.
+- **create** — new widgets, each framed generically in one line.
+  Include both "obviously generic" candidates and "looked
+  app-specific until we ran the from-scratch test."
+- **glue** — what intentionally stays in the app. Brief one-liners
+  so the user sees what's NOT a widget and why.
+
+For candidates that survived via the from-scratch test's "improves
+with iteration" signal, note that framing explicitly — it signals
+to the user that this widget will start small and harden across
+consumers rather than arriving fully formed.
+
+That's the output. Stop there.
+
+## Generic framing
+
+Every widget description — in the roadmap and eventually in the
+widget itself — must stand alone without naming the current
+consumer. Examples of the shift:
+
+- "LLM token pricing" → "metered pricing"
+- "user checkout flow" → "multi-step form with validation"
+- "dashboard data loader" → "paginated resource fetcher"
+
+If you can't frame a candidate generically, that's a signal —
+either the framing needs work, or the candidate is actually glue.
+
+## What not to do
+
+- Don't try to plan a whole app in one pass. Narrow to one feature.
+- Don't apply the from-scratch test to a candidate and accept a
+  consumer-shaped justification. The test asks about *the logic's
+  value across projects*, not about what the current app does.
+- Don't skip the red-flag check. Over-extraction creates widget
+  sprawl.
+- Don't composite small patterns into a bigger-sounding one to
+  force a pass. The composite has to stand on its own.
+- Don't use search as a gate. The roadmap exists independent of
+  library state; search just tells the user what already exists.
+- Don't cross into implementation. This skill stops at the
+  roadmap. Widget authoring is a separate step.
+- Don't name-drop sibling widget_ids in descriptions or reasoning.
+  Each widget stands on its own framing.
+
+## Scope
+
+Per-feature widget identification. That's the whole surface. If the
+user wants to talk about how to design a widget's API, author it,
+wire it in, handle contamination scanner issues, or anything
+downstream of the roadmap — that's outside this skill. Hand off
+cleanly.
