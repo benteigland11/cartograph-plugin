@@ -1,6 +1,6 @@
 {
   "name": "cartograph",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Widget library manager for AI agents. Search, install, validate, and publish reusable code components across languages and domains.",
   "author": {
     "name": "Ben Teigland",

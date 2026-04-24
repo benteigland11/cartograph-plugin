@@ -1,15 +1,18 @@
 ---
 name: cg-cloud
-description: Invoke when the user wants to understand the cloud layer — how publishing works, what governance means, what adopt/sync/unpublish do, whether to use cg or a self-hosted registry, or whether to make their widgets open or protected. Fires on "how does cloud work", "explain publishing", "what's governance", "open vs protected", "why can't I push this widget", "what does adopt do", "should I use cg or my own registry". Does NOT fire on one-off agent MCP calls made as part of a task (e.g. the agent calling checkin_widget with publish=true). Does NOT fire on config/defaults intent — that's cg-config. Does NOT fire on reviewing an incoming proposals queue — that's cg-proposals.
+description: Invoke when the user wants to understand or manage the cloud layer — publishing, governance, adopt/sync/unpublish, account authentication, registry configuration, or whether to use cg vs a self-hosted registry. Covers both conceptual questions ("what does X mean") and operational ones ("how do I log in", "how do I add a registry"). Fires on "how does cloud work", "explain publishing", "what's governance", "open vs protected", "why can't I push this widget", "what does adopt do", "should I use cg or my own registry", "manage my cloud account", "how do I log in to cartograph", "how do I add a registry", "list my registries", "who am I logged in as", "whoami", "how do I connect to a new registry". Does NOT fire on one-off agent MCP calls made as part of a task (e.g. the agent calling checkin_widget with publish=true). Does NOT fire on config/defaults intent — that's cg-config. Does NOT fire on reviewing an incoming proposals queue — that's cg-proposals.
 ---
 
 # cg-cloud — understand the cloud layer
 
-This skill orients the user to how Cartograph's cloud layer works so
-they can decide how they want to interact with it. It's explanatory,
-not action-driven. If the user wants to change defaults, hand to
-cg-config. If they want to walk their proposals queue, hand to
-cg-proposals.
+This skill orients the user to how Cartograph's cloud layer works
+and handles the bounded account and registry operations that go with
+it: login/logout/whoami, registry add/remove/list, adopt, sync,
+publish/unpublish.
+
+It does not own the stable setup preferences (cg-config handles
+defaults) or walking the proposals queue (cg-proposals). Hand off
+cleanly if the conversation drifts into either.
 
 ## Tool boundary
 
