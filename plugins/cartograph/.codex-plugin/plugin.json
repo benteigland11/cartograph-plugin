@@ -1,0 +1,40 @@
+{
+  "name": "cartograph",
+  "version": "0.1.2",
+  "description": "Widget library manager for AI agents. Search, install, validate, and publish reusable code components across languages and domains.",
+  "author": {
+    "name": "Ben Teigland",
+    "url": "https://github.com/benteigland11"
+  },
+  "homepage": "https://github.com/benteigland11/Cartograph",
+  "repository": "https://github.com/benteigland11/cartograph-plugin",
+  "license": "MIT",
+  "keywords": [
+    "widgets",
+    "code-reuse",
+    "agents",
+    "library",
+    "cartograph"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Cartograph",
+    "shortDescription": "Search, install, validate, and publish reusable code widgets",
+    "longDescription": "Use Cartograph to manage reusable code widgets across projects: search the registry before writing new logic, install existing widgets, validate local changes, check improvements back into the library, and publish through the Cartograph cloud workflow.",
+    "developerName": "Ben Teigland",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/benteigland11/Cartograph",
+    "defaultPrompt": [
+      "Plan this feature into reusable widgets.",
+      "Check my Cartograph setup.",
+      "Review pending widget proposals."
+    ],
+    "brandColor": "#2563EB",
+    "screenshots": []
+  }
+}

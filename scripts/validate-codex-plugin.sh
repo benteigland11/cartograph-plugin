@@ -32,6 +32,10 @@ for field in ("skills", "mcpServers", "interface"):
     if field not in codex:
         raise SystemExit(f"missing Codex plugin field: {field}")
 
+skills_dir = root / "skills"
+if not skills_dir.is_dir():
+    raise SystemExit("missing skills directory")
+
 if marketplace.get("name") != "cartograph-marketplace":
     raise SystemExit("Codex marketplace name must be cartograph-marketplace")
 plugins = marketplace.get("plugins")
@@ -57,9 +61,17 @@ except ValueError:
 if not (plugin_path / ".codex-plugin" / "plugin.json").is_file():
     raise SystemExit("Codex marketplace plugin path does not contain .codex-plugin/plugin.json")
 
-skills_dir = root / "skills"
-if not skills_dir.is_dir():
-    raise SystemExit("missing skills directory")
+nested_codex = load_json(plugin_path / ".codex-plugin" / "plugin.json")
+if nested_codex != codex:
+    raise SystemExit("nested Codex plugin manifest drifted from root .codex-plugin/plugin.json")
+if (plugin_path / ".mcp.json").read_text() != (root / ".mcp.json").read_text():
+    raise SystemExit("nested .mcp.json drifted from root .mcp.json")
+for skill in sorted(skills_dir.glob("*/SKILL.md")):
+    nested_skill = plugin_path / "skills" / skill.parent.name / "SKILL.md"
+    if not nested_skill.is_file():
+        raise SystemExit(f"nested plugin missing skill: {skill.parent.name}")
+    if nested_skill.read_text() != skill.read_text():
+        raise SystemExit(f"nested skill drifted from root skill: {skill.parent.name}")
 
 for skill in sorted(skills_dir.glob("*/SKILL.md")):
     text = skill.read_text()
