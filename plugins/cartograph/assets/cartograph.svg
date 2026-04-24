@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Cartograph">
+  <rect width="256" height="256" rx="48" fill="#2563EB"/>
+  <path d="M54 72l49-21 45 21 54-21v133l-54 21-45-21-49 21V72z" fill="#F8FAFC"/>
+  <path d="M103 51v133M148 72v133" fill="none" stroke="#2563EB" stroke-width="15" stroke-linecap="round"/>
+  <path d="M76 112c23-21 73-28 104-9M76 154c28-14 67-9 104-25" fill="none" stroke="#0F172A" stroke-width="12" stroke-linecap="round"/>
+</svg>

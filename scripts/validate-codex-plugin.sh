@@ -32,6 +32,15 @@ for field in ("skills", "mcpServers", "interface"):
     if field not in codex:
         raise SystemExit(f"missing Codex plugin field: {field}")
 
+interface = codex.get("interface") or {}
+for field in ("composerIcon", "logo", "privacyPolicyURL", "termsOfServiceURL"):
+    if not interface.get(field):
+        raise SystemExit(f"missing Codex interface field: {field}")
+for field in ("composerIcon", "logo"):
+    asset = root / interface[field]
+    if not asset.is_file():
+        raise SystemExit(f"missing Codex asset: {interface[field]}")
+
 skills_dir = root / "skills"
 if not skills_dir.is_dir():
     raise SystemExit("missing skills directory")
@@ -66,6 +75,14 @@ if nested_codex != codex:
     raise SystemExit("nested Codex plugin manifest drifted from root .codex-plugin/plugin.json")
 if (plugin_path / ".mcp.json").read_text() != (root / ".mcp.json").read_text():
     raise SystemExit("nested .mcp.json drifted from root .mcp.json")
+for field in ("composerIcon", "logo"):
+    asset_path = pathlib.Path(interface[field])
+    nested_asset = plugin_path / asset_path
+    root_asset = root / asset_path
+    if not nested_asset.is_file():
+        raise SystemExit(f"nested plugin missing asset: {asset_path}")
+    if nested_asset.read_text() != root_asset.read_text():
+        raise SystemExit(f"nested asset drifted from root asset: {asset_path}")
 for skill in sorted(skills_dir.glob("*/SKILL.md")):
     nested_skill = plugin_path / "skills" / skill.parent.name / "SKILL.md"
     if not nested_skill.is_file():

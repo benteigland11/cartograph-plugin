@@ -26,15 +26,20 @@
     "category": "Coding",
     "capabilities": [
       "Interactive",
+      "Read",
       "Write"
     ],
     "websiteURL": "https://github.com/benteigland11/Cartograph",
+    "privacyPolicyURL": "https://github.com/benteigland11/cartograph-plugin",
+    "termsOfServiceURL": "https://github.com/benteigland11/cartograph-plugin/blob/main/LICENSE",
     "defaultPrompt": [
       "Plan this feature into reusable widgets.",
       "Check my Cartograph setup.",
       "Review pending widget proposals."
     ],
     "brandColor": "#2563EB",
+    "composerIcon": "./assets/cartograph-small.svg",
+    "logo": "./assets/cartograph.svg",
     "screenshots": []
   }
 }

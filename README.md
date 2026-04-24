@@ -16,8 +16,9 @@ rules management, and config. It is published to PyPI as
 `cartograph-mcp` and runs through the `cartograph-mcp` console
 command.
 
-Agents pick it up via the standard `.mcp.json` at the repo root, or
-via an agent-specific registration if the agent prefers that path.
+Agents pick it up via the standard `.mcp.json` at the repo root when
+their plugin loader supports it, or via an agent-specific registration
+if the agent prefers that path.
 
 **Skills**
 
@@ -90,9 +91,11 @@ cartograph-mcp` manually and restart Claude Code.
 
 ## Install for Codex
 
-Codex consumes the manifest at `.codex-plugin/plugin.json` and the
-MCP config at `.mcp.json`. Codex does not currently run the Claude
-Code `SessionStart` hook, so install the MCP server yourself first:
+Codex consumes the marketplace manifest at
+`.agents/plugins/marketplace.json` and the plugin manifest at
+`plugins/cartograph/.codex-plugin/plugin.json`. Codex does not
+currently run the Claude Code `SessionStart` hook, so install the MCP
+server yourself first:
 
     pip install cartograph-mcp
 
@@ -100,12 +103,30 @@ Then add this plugin marketplace to Codex:
 
     codex plugin marketplace add https://github.com/benteigland11/cartograph-plugin
 
+Open Codex's slash plugin picker, select `cartograph`, and press Enter
+to install/enable it for the current Codex setup. Adding the marketplace
+only makes the plugin available; this picker step is what installs it.
+
 If you already added the marketplace before an update, refresh it with:
 
     codex plugin marketplace upgrade cartograph-marketplace
 
-The manifest points at `./skills/` for skill content and `./.mcp.json`
-for the MCP server.
+Then register the MCP server with Codex:
+
+    codex mcp add cartograph -- cartograph-mcp
+
+Confirm Codex can see it:
+
+    codex mcp list
+
+You should see `cartograph` with command `cartograph-mcp` and status
+`enabled`.
+
+The published marketplace entry points Codex at
+`plugins/cartograph/`. That nested plugin contains the Codex manifest,
+skills, and `.mcp.json`. The explicit `codex mcp add` step is still
+needed for Codex versions that do not auto-register MCP servers from a
+marketplace plugin.
 
 `.mcp.json` launches the server with:
 
