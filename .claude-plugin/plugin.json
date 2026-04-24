@@ -10,9 +10,26 @@
   "repository": "https://github.com/benteigland11/cartograph-plugin",
   "license": "MIT",
   "keywords": ["widgets", "code-reuse", "agents", "library", "cartograph"],
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/init-mcp.sh"
+          }
+        ]
+      }
+    ]
+  },
   "mcpServers": {
     "cartograph": {
-      "command": "cartograph-mcp"
+      "command": "python3",
+      "args": ["-m", "cartograph_mcp.server"],
+      "env": {
+        "PYTHONPATH": "${CLAUDE_PLUGIN_DATA}/lib"
+      }
     }
   }
 }
