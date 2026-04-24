@@ -22,6 +22,43 @@ Don't mix the two. If the user opens with a briefing request, don't
 drift into recommendations. If they open with an intent, don't deliver
 a full briefing first — offer profiles directly.
 
+## Tool boundary
+
+Prefer `cartograph_config` for reading or changing config keys exposed
+by the MCP surface. Use the `cartograph` CLI for registry management,
+auth state, doctor output, path diagnostics, or settings that are not
+currently exposed as MCP tools.
+
+## Agent setup
+
+Config covers Cartograph's own defaults, but the agent also needs to
+know Cartograph exists. That lives in the agent's instructions file
+(e.g. `CLAUDE.md`, `AGENTS.md`) and is written by the CLI:
+
+    cartograph setup
+
+The command auto-detects the agent, appends Cartograph instructions
+to the right file, and never replaces existing content. Useful flags:
+
+- `--agent <name>` force a specific agent when auto-detect is wrong
+  or the user works with multiple agents.
+- `--file <path>` target a specific file instead of the auto-detected
+  one.
+- `--print` print the instructions to stdout instead of writing,
+  useful when the user wants to review before committing.
+
+When to surface this:
+
+- The user asks how to connect a new agent to Cartograph.
+- The user is on an agent that doesn't ship a Cartograph plugin
+  (bare CLI, Aider, Cursor without the MCP registered, etc).
+- The user reports the agent "doesn't seem to know about widgets"
+  despite the MCP being live.
+
+Skip it when the user is already running the Cartograph plugin for
+their agent — the plugin ships its own teaching layer and `cartograph
+setup` would duplicate it.
+
 ## Briefing mode
 
 ### Frame the briefing as three workflow questions

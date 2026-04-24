@@ -20,6 +20,17 @@ If the conversation drifts into actually writing widget code, this
 skill ends. The user takes the roadmap into the widget-authoring
 flow.
 
+## Tool boundary
+
+Prefer Cartograph MCP tools when they cover the action. Use
+`registry_widget search` and `registry_widget inspect` for registry
+lookup, `registry_widget install` when a match should be installed,
+and `widget_status` for installed widget state. `installed_widget` is
+for upgrade/uninstall actions, not search.
+
+Use the `cartograph` CLI only for capabilities not exposed by the MCP
+surface or when the user explicitly asks for CLI behavior.
+
 ## Scope: one feature at a time
 
 This skill plans a single feature. If the user frames the ask as a
@@ -87,9 +98,10 @@ from-scratch test says yes AND the red flag doesn't trip.
 
 ### 4. Search the library (informational)
 
-For each survivor, search the library once: `registry_widget`
-and/or `installed_widget` with 2–3 terms drawn from the candidate's
-generic framing. Not a gate — information.
+For each survivor, search the library once with `registry_widget
+search` using 2–3 terms drawn from the candidate's generic framing.
+If local installed state matters, use `widget_status`. Not a gate —
+information.
 
 Three outcomes per survivor:
 - **Already covered** → install the existing widget, no new work.

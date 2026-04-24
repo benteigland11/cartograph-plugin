@@ -11,6 +11,17 @@ not action-driven. If the user wants to change defaults, hand to
 cg-config. If they want to walk their proposals queue, hand to
 cg-proposals.
 
+## Tool boundary
+
+Prefer Cartograph MCP tools when they cover the action. Use
+`cartograph_config` for defaults, `checkin_widget` with
+`publish=true` for explicit checkin-and-publish flows, and
+`registry_widget` for search/install/inspect operations.
+
+Use the `cartograph` CLI for auth, registry listing, proposals,
+adopt/sync/unpublish/settings, or other cloud commands that are not
+currently exposed as MCP tools.
+
 ## Opening reads
 
 In parallel, call:

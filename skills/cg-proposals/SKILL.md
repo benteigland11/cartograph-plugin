@@ -14,6 +14,13 @@ If the user asks what governance is, what a proposal does
 structurally, or how the cloud layer works, hand to cg-cloud and
 stop.
 
+## Tool boundary
+
+Use the `cartograph` CLI for proposal review because proposal queue,
+diff, accept, and reject operations are not currently exposed as MCP
+tools. Do not try to model this workflow with registry search or
+generic widget status calls.
+
 ## Opening reads
 
 In parallel:
