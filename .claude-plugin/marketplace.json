@@ -1,0 +1,14 @@
+{
+  "name": "cartograph-marketplace",
+  "owner": {
+    "name": "Ben Teigland",
+    "url": "https://github.com/benteigland11"
+  },
+  "plugins": [
+    {
+      "name": "cartograph",
+      "source": "./",
+      "description": "Widget library manager for AI agents. Ships the Cartograph MCP server (auto-installed) plus four skills: cg-plan, cg-config, cg-cloud, cg-proposals."
+    }
+  ]
+}
