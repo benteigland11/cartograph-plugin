@@ -96,8 +96,15 @@ Code `SessionStart` hook, so install the MCP server yourself first:
 
     pip install cartograph-mcp
 
-Then have Codex load this repo per Codex's plugin install flow. The
-manifest points at `./skills/` for skill content and `./.mcp.json`
+Then add this plugin marketplace to Codex:
+
+    codex plugin marketplace add https://github.com/benteigland11/cartograph-plugin
+
+If you already added the marketplace before an update, refresh it with:
+
+    codex plugin marketplace upgrade cartograph-marketplace
+
+The manifest points at `./skills/` for skill content and `./.mcp.json`
 for the MCP server.
 
 `.mcp.json` launches the server with:
