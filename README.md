@@ -1,13 +1,23 @@
 # cartograph-plugin
 
-A Claude Code plugin for [Cartograph](https://github.com/benteigland11/Cartograph),
-the widget library manager for AI agents.
+Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph),
+the widget library manager for AI coding agents.
 
-Installing this plugin gives Claude Code the Cartograph MCP server
-(auto-registered and auto-installed on first session) plus four skills
-that teach Claude to use widgets well.
+Ships the Cartograph MCP server plus a set of skills. Supported
+agents so far: Claude Code and Codex.
 
 ## What ships
+
+**MCP server**
+
+The Cartograph MCP server exposes registry search, installed-widget
+management, widget status, widget creation, validation, checkin,
+rules management, and config. It is published to PyPI as
+`cartograph-mcp` and runs through the `cartograph-mcp` console
+command.
+
+Agents pick it up via the standard `.mcp.json` at the repo root, or
+via an agent-specific registration if the agent prefers that path.
 
 **Skills**
 
@@ -19,34 +29,48 @@ that teach Claude to use widgets well.
 - `cg-proposals` walks the pending proposals queue on widgets the
   user owns, one proposal at a time.
 
-**MCP server**
-
-Claude Code auto-registers the Cartograph MCP server on install. No
-manual `claude mcp add` step. No manual `pip install`. The plugin
-handles setup the first time a session starts.
-
-**CLAUDE.md**
-
-An always-on instructions layer describing the Cartograph mentality
-(search the library before writing new logic), the widget identity
-format, domain and language taxonomy, and the canonical flow for
-creating and checking in widgets.
+How each agent surfaces skills depends on the agent. See the
+per-agent sections below.
 
 ## Prerequisites
 
-Claude Code, plus Python 3.10 or newer with `pip` on the PATH. That
-is everything the plugin needs. On first session it installs
-`cartograph-mcp` into its own data directory, so no separate `pip
-install` step is required.
+Python 3.10 or newer with `pip` on the PATH. The Cartograph MCP
+server is a Python package.
 
-If you already use Cartograph from the command line outside of Claude
-Code, or if you simply want to install the package system-wide, run:
+If you want `cartograph-mcp` available system-wide:
 
     pip install cartograph-mcp
 
-The plugin detects the existing install and skips its own bootstrap.
+Claude Code can install it automatically on first session, so this
+step is optional for Claude Code users. For Codex, install it
+yourself before starting a session.
 
-## How the auto-install works
+## Install for Claude Code
+
+Claude Code treats this repo as a plugin via the manifest at
+`.claude-plugin/plugin.json`. The plugin auto-registers the MCP
+server and installs `cartograph-mcp` on first session, so there is
+no separate `claude mcp add` or `pip install` step.
+
+### From the Claude Code marketplace
+
+    /plugin marketplace add benteigland11/cartograph-plugin
+    /plugin install cartograph@cartograph-marketplace
+
+Skills appear as `/cartograph:cg-plan`, `/cartograph:cg-config`,
+`/cartograph:cg-cloud`, and `/cartograph:cg-proposals`, and also
+auto-trigger based on natural language matching their descriptions.
+
+### Local development install
+
+    git clone https://github.com/benteigland11/cartograph-plugin
+    claude --plugin-dir ./cartograph-plugin
+
+After editing any SKILL.md, plugin.json, or the hook script, run
+`/reload-plugins` to pick up the change without restarting Claude
+Code.
+
+### How the Claude Code auto-install works
 
 The plugin ships a `SessionStart` hook at `scripts/init-mcp.sh` that
 runs when Claude Code starts a session. On the first run it checks
@@ -64,49 +88,52 @@ a pip configuration that blocks `--target`), the hook prints a clear
 fallback instruction asking the user to run `pip install
 cartograph-mcp` manually and restart Claude Code.
 
-## Install
+## Install for Codex
 
-### From the Claude Code marketplace
+Codex consumes the manifest at `.codex-plugin/plugin.json` and the
+MCP config at `.mcp.json`. Codex does not currently run the Claude
+Code `SessionStart` hook, so install the MCP server yourself first:
 
-Coming soon. While the plugin is in development, use the local
-install below.
+    pip install cartograph-mcp
 
-### Local development install
+Then have Codex load this repo per Codex's plugin install flow. The
+manifest points at `./skills/` for skill content and `./.mcp.json`
+for the MCP server.
 
-Clone the repo and point Claude Code at it:
+`.mcp.json` launches the server with:
 
-    git clone https://github.com/benteigland11/cartograph-plugin
-    claude --plugin-dir ./cartograph-plugin
+    cartograph-mcp
 
-Skills appear as `/cartograph:cg-plan`, `/cartograph:cg-config`,
-`/cartograph:cg-cloud`, and `/cartograph:cg-proposals`. They also
-auto-trigger based on natural language matching their descriptions,
-so in practice you usually just say what you want and Claude picks
-the right skill.
+## Validate
 
-After editing any SKILL.md, plugin.json, or the hook script, run
-`/reload-plugins` to pick up the change without restarting Claude
-Code.
+After editing Codex packaging or shared skill metadata, run:
+
+    scripts/validate-codex-plugin.sh
+
+That checks Codex JSON, required skill frontmatter, the
+`cartograph-mcp` entrypoint, and shared metadata drift between the
+Claude and Codex manifests.
 
 ## Quick start
 
-Once the plugin is loaded, any of these prompts will invoke a skill:
+Once the plugin is loaded, any of these prompts will invoke the
+relevant skill:
 
 > "I want to build a retry wrapper for HTTP calls. What parts should
 > be widgets?"
 
-Claude invokes `cg-plan` and walks the feature through widget
+The agent runs `cg-plan` and walks the feature through widget
 identification.
 
 > "How should Cartograph be set up if I want to keep widgets
 > private?"
 
-Claude invokes `cg-config` and recommends a named profile.
+The agent runs `cg-config` and recommends a named profile.
 
 > "Someone proposed a change to one of my widgets. Help me review
 > it."
 
-Claude invokes `cg-proposals` and walks the queue, showing the
+The agent runs `cg-proposals` and walks the queue, showing the
 inline diff summary for each proposal.
 
 ## What Cartograph is

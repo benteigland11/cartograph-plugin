@@ -1,4 +1,5 @@
 ---
+name: cg-config
 description: Invoke when the user wants to understand, review, change, or get recommendations for their Cartograph *setup* — the stable preferences that shape every future checkin, search, and install. Fires on "what's my config", "walk me through my setup", "I want X to be the default", "change my settings", "what should my setup be", "how should I configure Cartograph if I want to <intent>", or any intent about defaults/preferences (private widgets by default, switch registries, point Cartograph at a custom engine binary). Does NOT fire when the user wants to take a one-off action on a specific widget. Does NOT fire when the agent just needs to read one config value for its own work — that's a direct MCP tool call.
 ---
 

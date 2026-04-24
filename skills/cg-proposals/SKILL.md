@@ -1,4 +1,5 @@
 ---
+name: cg-proposals
 description: Invoke when the user wants to review, accept, or reject pending proposals on widgets they own. Fires on "review my proposals", "walk through pending proposals", "someone proposed a change to my widget", "accept this proposal", "reject this proposal", "show me the diff for proposal X". Does NOT fire on questions about what proposals or governance are — that's cg-cloud. Does NOT fire on one-off agent MCP calls made as part of another task. Does NOT fire on changing governance defaults — that's cg-config.
 ---
 

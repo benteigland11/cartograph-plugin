@@ -1,4 +1,5 @@
 ---
+name: cg-plan
 description: Invoke when the user wants to plan a feature by identifying which parts should be widgets and which parts should stay as app glue. Fires on "plan this feature", "break this feature into widgets", "what widgets would I need for X", "how should I decompose Y", "what parts of this are reusable". Works per-feature, not per-app — if the user brings a whole app, narrow to one feature first. Does NOT fire once implementation has started, or for one-off fixes. Does NOT teach widget design patterns, glue gotchas, or authoring (that's widget creation, not identification). Does NOT teach the cloud layer (cg-cloud), change config (cg-config), or review proposals (cg-proposals).
 ---
 

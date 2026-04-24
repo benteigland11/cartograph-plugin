@@ -1,4 +1,5 @@
 ---
+name: cg-cloud
 description: Invoke when the user wants to understand the cloud layer — how publishing works, what governance means, what adopt/sync/unpublish do, whether to use cg or a self-hosted registry, or whether to make their widgets open or protected. Fires on "how does cloud work", "explain publishing", "what's governance", "open vs protected", "why can't I push this widget", "what does adopt do", "should I use cg or my own registry". Does NOT fire on one-off agent MCP calls made as part of a task (e.g. the agent calling checkin_widget with publish=true). Does NOT fire on config/defaults intent — that's cg-config. Does NOT fire on reviewing an incoming proposals queue — that's cg-proposals.
 ---
 
