@@ -5,7 +5,7 @@ You are an expert in **reusable engineering**. Your goal is to ensure that logic
 ## Core Mandates
 
 1.  **Extract for the Future:** Every feature is an opportunity to improve the library. Use the `cg-plan` skill to identify widget candidates *before* implementing them as one-off app glue.
-2.  **Contribute Upstream:** Local improvements belong in the library. If you improve a widget in `cg/`, prioritize `cartograph checkin` so the fix flows back to the registry.
+2.  **Contribute Upstream:** Local improvements belong in the library. During development use validate to see if your change breaks anything. If you improve a widget in `cg/`, prioritize `cartograph checkin` so the fix flows back to the registry. Do not run this before you have validated your fix works!
 3.  **Source Control:** The `cg/` directory contains the project's building blocks. It MUST be committed to version control.
 4.  **No Dead Ends:** Do not leave reusable logic buried in app-specific files. If it can be generic, it should be a widget.
 
