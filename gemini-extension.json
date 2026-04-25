@@ -1,7 +1,11 @@
 {
   "name": "cartograph",
+  "displayName": "Cartograph",
   "version": "0.1.2",
-  "description": "Cartograph widget library manager - Search, install, and manage reusable widgets.",
+  "description": "Stop hard-won logic from disappearing. Cartograph turns project-specific work into hardened widgets that benefit 'future you' and every project that follows.",
+  "author": "Ben Teigland",
+  "repository": "https://github.com/benteigland11/cartograph-plugin",
+  "homepage": "https://github.com/benteigland11/cartograph-plugin",
   "mcpServers": {
     "cartograph": {
       "command": "cartograph-mcp",
@@ -14,5 +18,10 @@
     "${extensionPath}/skills/cg-cloud",
     "${extensionPath}/skills/cg-proposals"
   ],
-  "contextFileName": "GEMINI.md"
+  "contextFileName": "GEMINI.md",
+  "categories": [
+    "productivity",
+    "development",
+    "agent-tools"
+  ]
 }
