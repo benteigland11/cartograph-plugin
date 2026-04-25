@@ -1,7 +1,7 @@
 {
   "name": "cartograph",
   "displayName": "Cartograph",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Stop hard-won logic from disappearing. Cartograph turns project-specific work into hardened widgets that benefit 'future you' and every project that follows.",
   "author": "Ben Teigland",
   "repository": "https://github.com/benteigland11/cartograph-plugin",
