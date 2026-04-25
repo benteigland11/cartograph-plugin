@@ -71,6 +71,23 @@ After editing any SKILL.md, plugin.json, or the hook script, run
 `/reload-plugins` to pick up the change without restarting Claude
 Code.
 
+## Install for Gemini CLI
+
+Gemini CLI uses the `gemini-extension.json` manifest. Gemini does not
+run the Claude Code `SessionStart` hook, so install the MCP server
+yourself first:
+
+    pip install cartograph-mcp
+
+Then link the plugin locally:
+
+    gemini extensions link ./cartograph-plugin
+
+This will:
+1.  Register the Cartograph MCP server.
+2.  Enable the `cg-plan`, `cg-config`, `cg-cloud`, and `cg-proposals` skills.
+3.  Inject the "Project-to-Project Contribution" mindset via `GEMINI.md`.
+
 ### How the Claude Code auto-install works
 
 The plugin ships a `SessionStart` hook at `scripts/init-mcp.sh` that
