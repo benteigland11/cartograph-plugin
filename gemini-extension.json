@@ -1,5 +1,5 @@
 {
-  "name": "cartograph",
+  "name": "cartograph-plugin",
   "displayName": "Cartograph",
   "version": "0.1.3",
   "description": "Stop hard-won logic from disappearing. Cartograph turns project-specific work into hardened widgets that benefit 'future you' and every project that follows.",
