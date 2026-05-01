@@ -3,22 +3,25 @@
 Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph),
 the widget library manager for AI coding agents.
 
-Ships the Cartograph MCP server plus a set of skills. Supported
-agents so far: Claude Code and Codex.
+Ships the Cartograph MCP server plus a set of skills. Designed to work
+across hosts. Currently packaged for **Claude Code**, **Codex**, and
+**Gemini CLI**, with one shared body of skill content and per-host
+manifests in their respective conventions.
 
 ## What ships
 
 **MCP server**
 
 The Cartograph MCP server exposes registry search, installed-widget
-management, widget status, widget creation, validation, checkin,
-rules management, and config. It is published to PyPI as
-`cartograph-mcp` and runs through the `cartograph-mcp` console
-command.
+management, widget status, widget creation, validation, checkin, rules
+management, and config. It is published to PyPI as `cartograph-mcp`
+and runs through the `cartograph-mcp` console command (or
+`python -m cartograph_mcp.server` when invoked as a Python module).
 
-Agents pick it up via the standard `.mcp.json` at the repo root when
-their plugin loader supports it, or via an agent-specific registration
-if the agent prefers that path.
+Each host registers the server its own way:
+- **Claude Code** — `mcpServers` block in `.claude-plugin/plugin.json`
+- **Codex** — `.mcp.json` referenced from `providers/codex/.codex-plugin/plugin.json`
+- **Gemini CLI** — `mcpServers` block in `gemini-extension.json`
 
 **Skills**
 
@@ -30,28 +33,36 @@ if the agent prefers that path.
 - `cg-proposals` walks the pending proposals queue on widgets the
   user owns, one proposal at a time.
 
-How each agent surfaces skills depends on the agent. See the
-per-agent sections below.
+How each host surfaces skills depends on the host. See the per-host
+sections below.
+
+## Repo layout
+
+- `skills/` — base skill content shared across hosts.
+- `.claude-plugin/` — Claude Code plugin manifest + Claude marketplace manifest.
+- `gemini-extension.json` — Gemini CLI extension manifest at repo root.
+- `.agents/plugins/marketplace.json` + `providers/codex/` — Codex marketplace manifest and provider package. Codex skills may diverge from the base skills when Codex needs provider-specific instructions.
+- `scripts/` — bootstrap helpers (cross-platform Python).
 
 ## Prerequisites
 
-Python 3.10 or newer with `pip` on the PATH. The Cartograph MCP
-server is a Python package.
+Python 3.10 or newer with `pip` on the PATH. The Cartograph MCP server
+is a Python package, and `python` must resolve to a Python 3 interpreter
+on your PATH (true on Windows out of the box, and on modern macOS/Linux).
 
-If you want `cartograph-mcp` available system-wide:
+The cleanest setup on any host:
 
     pip install cartograph-mcp
 
-Claude Code can install it automatically on first session, so this
-step is optional for Claude Code users. For Codex, install it
-yourself before starting a session.
+Claude Code can also do this for you on first session via a bootstrap
+hook (see "Install for Claude Code" below). Codex and Gemini CLI do
+not have an equivalent hook, so install once yourself.
 
 ## Install for Claude Code
 
 Claude Code treats this repo as a plugin via the manifest at
-`.claude-plugin/plugin.json`. The plugin auto-registers the MCP
-server and installs `cartograph-mcp` on first session, so there is
-no separate `claude mcp add` or `pip install` step.
+`.claude-plugin/plugin.json`. The plugin auto-registers the MCP server
+and (optionally) installs `cartograph-mcp` on first session.
 
 ### From the Claude Code marketplace
 
@@ -71,48 +82,37 @@ After editing any SKILL.md, plugin.json, or the hook script, run
 `/reload-plugins` to pick up the change without restarting Claude
 Code.
 
-## Install for Gemini CLI
+### How the Claude Code bootstrap hook works
 
-Gemini CLI uses the `gemini-extension.json` manifest. Gemini does not
-run the Claude Code `SessionStart` hook, so install the MCP server
-yourself first:
+The plugin ships a `SessionStart` hook at `scripts/init-mcp.py`
+(cross-platform Python — works on Linux, macOS, and Windows). On the
+first run it checks whether `cartograph_mcp` is importable. If the
+import fails it runs `pip install --target $CLAUDE_PLUGIN_DATA/lib
+cartograph-mcp`, which also pulls in `cartograph-cli` as a dependency.
+On every later session the check passes instantly and the hook exits
+as a no-op.
 
-    pip install cartograph-mcp
+Claude Code launches the MCP server as `python -m cartograph_mcp.server`
+with `PYTHONPATH` set to the plugin data lib, so the auto-installed
+package is always found.
 
-Then link the plugin locally:
+If the auto-install fails (no network, restricted environment, a pip
+configuration that blocks `--target`), the hook prints a clear fallback
+instruction asking you to run `pip install cartograph-mcp` manually and
+restart Claude Code. You can also pre-install at any time and the hook
+becomes a no-op.
 
-    gemini extensions link ./cartograph-plugin
-
-This will:
-1.  Register the Cartograph MCP server.
-2.  Enable the `cg-plan`, `cg-config`, `cg-cloud`, and `cg-proposals` skills.
-3.  Inject the "Project-to-Project Contribution" mindset via `GEMINI.md`.
-
-### How the Claude Code auto-install works
-
-The plugin ships a `SessionStart` hook at `scripts/init-mcp.sh` that
-runs when Claude Code starts a session. On the first run it checks
-whether `cartograph_mcp` is importable. If the import fails it runs
-`pip install --target ${CLAUDE_PLUGIN_DATA}/lib cartograph-mcp`, which
-also pulls in `cartograph-cli` as a dependency. On every later
-session the check passes instantly and the hook exits as a no-op.
-
-Claude Code launches the MCP server as `python3 -m
-cartograph_mcp.server` with `PYTHONPATH` set to the plugin data lib,
-so the auto-installed package is always found.
-
-If the auto-install ever fails (no network, restricted environment,
-a pip configuration that blocks `--target`), the hook prints a clear
-fallback instruction asking the user to run `pip install
-cartograph-mcp` manually and restart Claude Code.
+This bootstrap is a Claude-Code-specific convenience because Claude
+Code has session-start hooks. The other hosts don't, so on those you
+install `cartograph-mcp` once yourself.
 
 ## Install for Codex
 
 Codex consumes the marketplace manifest at
 `.agents/plugins/marketplace.json` and the plugin manifest at
-`plugins/cartograph/.codex-plugin/plugin.json`. Codex does not
-currently run the Claude Code `SessionStart` hook, so install the MCP
-server yourself first:
+`providers/codex/.codex-plugin/plugin.json`.
+
+Install `cartograph-mcp` first:
 
     pip install cartograph-mcp
 
@@ -139,15 +139,36 @@ Confirm Codex can see it:
 You should see `cartograph` with command `cartograph-mcp` and status
 `enabled`.
 
-The published marketplace entry points Codex at
-`plugins/cartograph/`. That nested plugin contains the Codex manifest,
-skills, and `.mcp.json`. The explicit `codex mcp add` step is still
-needed for Codex versions that do not auto-register MCP servers from a
-marketplace plugin.
+The published marketplace entry points Codex at `providers/codex/`.
+That provider package contains the Codex manifest, skills, assets, and
+`.mcp.json`. The explicit `codex mcp add` step is still needed for
+Codex versions that do not auto-register MCP servers from a marketplace
+plugin.
 
 `.mcp.json` launches the server with:
 
     cartograph-mcp
+
+## Install for Gemini CLI
+
+Gemini CLI uses the `gemini-extension.json` manifest at the repo root.
+
+Install `cartograph-mcp` first:
+
+    pip install cartograph-mcp
+
+Then link the plugin locally:
+
+    gemini extensions link ./cartograph-plugin
+
+This:
+1. Registers the Cartograph MCP server.
+2. Enables the `cg-plan`, `cg-config`, `cg-cloud`, and `cg-proposals` skills.
+3. Loads the `GEMINI.md` context file.
+
+For gallery discoverability, the upstream `cartograph-plugin` repo is
+tagged with the `gemini-cli-extension` GitHub topic so the Gemini CLI
+crawler can find it.
 
 ## Validate
 
@@ -156,13 +177,16 @@ After editing Codex packaging or shared skill metadata, run:
     scripts/validate-codex-plugin.sh
 
 That checks Codex JSON, required skill frontmatter, the
-`cartograph-mcp` entrypoint, and shared metadata drift between the
-Claude and Codex manifests.
+`cartograph-mcp` entrypoint, shared identity metadata drift between
+the Claude and Codex manifests, and reports any intentional Codex skill
+variants that differ from the base skills. Provider versions are
+independent, so a Codex-only skill change only needs a Codex version
+bump.
 
 ## Quick start
 
-Once the plugin is loaded, any of these prompts will invoke the
-relevant skill:
+Once the plugin is loaded on any host, prompts like these will invoke
+the relevant skill:
 
 > "I want to build a retry wrapper for HTTP calls. What parts should
 > be widgets?"
@@ -170,13 +194,11 @@ relevant skill:
 The agent runs `cg-plan` and walks the feature through widget
 identification.
 
-> "How should Cartograph be set up if I want to keep widgets
-> private?"
+> "How should Cartograph be set up if I want to keep widgets private?"
 
 The agent runs `cg-config` and recommends a named profile.
 
-> "Someone proposed a change to one of my widgets. Help me review
-> it."
+> "Someone proposed a change to one of my widgets. Help me review it."
 
 The agent runs `cg-proposals` and walks the queue, showing the
 inline diff summary for each proposal.

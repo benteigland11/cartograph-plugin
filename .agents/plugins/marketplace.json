@@ -8,7 +8,7 @@
       "name": "cartograph",
       "source": {
         "source": "local",
-        "path": "./plugins/cartograph"
+        "path": "./providers/codex"
       },
       "policy": {
         "installation": "AVAILABLE",

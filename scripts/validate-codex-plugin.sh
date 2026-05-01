@@ -16,30 +16,9 @@ def load_json(path: pathlib.Path):
     except Exception as exc:
         raise SystemExit(f"invalid JSON: {path.relative_to(root)}: {exc}")
 
-codex = load_json(root / ".codex-plugin" / "plugin.json")
 load_json(root / ".mcp.json")
 claude = load_json(root / ".claude-plugin" / "plugin.json")
 marketplace = load_json(root / ".agents" / "plugins" / "marketplace.json")
-
-for key in ("name", "version", "description", "homepage", "repository", "license"):
-    if codex.get(key) != claude.get(key):
-        raise SystemExit(
-            f"metadata drift for {key}: "
-            f"codex={codex.get(key)!r} claude={claude.get(key)!r}"
-        )
-
-for field in ("skills", "mcpServers", "interface"):
-    if field not in codex:
-        raise SystemExit(f"missing Codex plugin field: {field}")
-
-interface = codex.get("interface") or {}
-for field in ("composerIcon", "logo", "privacyPolicyURL", "termsOfServiceURL"):
-    if not interface.get(field):
-        raise SystemExit(f"missing Codex interface field: {field}")
-for field in ("composerIcon", "logo"):
-    asset = root / interface[field]
-    if not asset.is_file():
-        raise SystemExit(f"missing Codex asset: {interface[field]}")
 
 skills_dir = root / "skills"
 if not skills_dir.is_dir():
@@ -70,25 +49,61 @@ except ValueError:
 if not (plugin_path / ".codex-plugin" / "plugin.json").is_file():
     raise SystemExit("Codex marketplace plugin path does not contain .codex-plugin/plugin.json")
 
-nested_codex = load_json(plugin_path / ".codex-plugin" / "plugin.json")
-if nested_codex != codex:
-    raise SystemExit("nested Codex plugin manifest drifted from root .codex-plugin/plugin.json")
+codex = load_json(plugin_path / ".codex-plugin" / "plugin.json")
+
+for key in ("name", "description", "homepage", "repository", "license"):
+    if codex.get(key) != claude.get(key):
+        raise SystemExit(
+            f"metadata drift for {key}: "
+            f"codex={codex.get(key)!r} claude={claude.get(key)!r}"
+        )
+
+for field in ("skills", "mcpServers", "interface"):
+    if field not in codex:
+        raise SystemExit(f"missing Codex plugin field: {field}")
+
+interface = codex.get("interface") or {}
+for field in ("composerIcon", "logo", "privacyPolicyURL", "termsOfServiceURL"):
+    if not interface.get(field):
+        raise SystemExit(f"missing Codex interface field: {field}")
+for field in ("composerIcon", "logo"):
+    asset = root / interface[field]
+    if not asset.is_file():
+        raise SystemExit(f"missing root asset mirrored by Codex provider: {interface[field]}")
+
 if (plugin_path / ".mcp.json").read_text() != (root / ".mcp.json").read_text():
-    raise SystemExit("nested .mcp.json drifted from root .mcp.json")
+    raise SystemExit("Codex provider .mcp.json drifted from root .mcp.json")
 for field in ("composerIcon", "logo"):
     asset_path = pathlib.Path(interface[field])
-    nested_asset = plugin_path / asset_path
+    provider_asset = plugin_path / asset_path
     root_asset = root / asset_path
-    if not nested_asset.is_file():
-        raise SystemExit(f"nested plugin missing asset: {asset_path}")
-    if nested_asset.read_text() != root_asset.read_text():
-        raise SystemExit(f"nested asset drifted from root asset: {asset_path}")
+    if not provider_asset.is_file():
+        raise SystemExit(f"Codex provider missing asset: {asset_path}")
+    if provider_asset.read_text() != root_asset.read_text():
+        raise SystemExit(f"Codex provider asset drifted from root asset: {asset_path}")
+codex_skills_dir = plugin_path / "skills"
+if not codex_skills_dir.is_dir():
+    raise SystemExit("Codex provider package missing skills directory")
+
+base_skill_names = {skill.parent.name for skill in skills_dir.glob("*/SKILL.md")}
+codex_skill_names = {skill.parent.name for skill in codex_skills_dir.glob("*/SKILL.md")}
+missing_codex_skills = sorted(base_skill_names - codex_skill_names)
+if missing_codex_skills:
+    raise SystemExit(
+        "Codex provider package missing skills: "
+        + ", ".join(missing_codex_skills)
+    )
+
+diverged_skills = []
 for skill in sorted(skills_dir.glob("*/SKILL.md")):
-    nested_skill = plugin_path / "skills" / skill.parent.name / "SKILL.md"
-    if not nested_skill.is_file():
-        raise SystemExit(f"nested plugin missing skill: {skill.parent.name}")
-    if nested_skill.read_text() != skill.read_text():
-        raise SystemExit(f"nested skill drifted from root skill: {skill.parent.name}")
+    codex_skill = codex_skills_dir / skill.parent.name / "SKILL.md"
+    if codex_skill.read_text() != skill.read_text():
+        diverged_skills.append(skill.parent.name)
+if diverged_skills:
+    print(
+        "Codex skill variants differ from base: "
+        + ", ".join(diverged_skills)
+    )
 
 for skill in sorted(skills_dir.glob("*/SKILL.md")):
     text = skill.read_text()
@@ -110,6 +125,29 @@ for skill in sorted(skills_dir.glob("*/SKILL.md")):
     if fields["name"] != skill.parent.name:
         raise SystemExit(
             f"skill name does not match folder: {skill.relative_to(root)} "
+            f"has {fields['name']!r}"
+        )
+
+for skill in sorted(codex_skills_dir.glob("*/SKILL.md")):
+    text = skill.read_text()
+    if not text.startswith("---\n"):
+        raise SystemExit(f"missing Codex skill frontmatter: {skill.relative_to(root)}")
+    try:
+        frontmatter = text.split("---\n", 2)[1]
+    except IndexError:
+        raise SystemExit(f"malformed Codex skill frontmatter: {skill.relative_to(root)}")
+    fields = {}
+    for line in frontmatter.splitlines():
+        if ":" in line:
+            key, value = line.split(":", 1)
+            fields[key.strip()] = value.strip()
+    if not fields.get("name"):
+        raise SystemExit(f"missing Codex skill name: {skill.relative_to(root)}")
+    if not fields.get("description"):
+        raise SystemExit(f"missing Codex skill description: {skill.relative_to(root)}")
+    if fields["name"] != skill.parent.name:
+        raise SystemExit(
+            f"Codex skill name does not match folder: {skill.relative_to(root)} "
             f"has {fields['name']!r}"
         )
 
