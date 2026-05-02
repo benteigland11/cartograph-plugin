@@ -159,7 +159,7 @@ Install `cartograph-mcp` first:
 
 Then link the plugin locally:
 
-    gemini extensions link ./cartograph-plugin
+    gemini extensions install https://github.com/benteigland11/cartograph-plugin
 
 This:
 1. Registers the Cartograph MCP server.
