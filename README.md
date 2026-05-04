@@ -170,6 +170,44 @@ For gallery discoverability, the upstream `cartograph-plugin` repo is
 tagged with the `gemini-cli-extension` GitHub topic so the Gemini CLI
 crawler can find it.
 
+## Install for OpenClaw
+
+OpenClaw can load this repo as a compatible plugin bundle. The root
+package includes the ClawHub-required `openclaw.plugin.json` plus a
+Claude-compatible bundle with shared skills and `.mcp.json`;
+`providers/codex/` is also a Codex-compatible bundle with the same MCP
+server config and Codex-specific skill copies. Current OpenClaw
+versions still detect the root package as a bundle and expose the MCP
+server from `.mcp.json`.
+
+Install `cartograph-mcp` first:
+
+    pip install cartograph-mcp
+
+For local testing with current OpenClaw versions:
+
+    openclaw plugins install ./cartograph-plugin
+    openclaw plugins list
+    openclaw plugins inspect cartograph
+    openclaw gateway restart
+
+Bundles should show as `Format: bundle`. OpenClaw maps the skill roots
+and the stdio MCP server declared in `.mcp.json`; the MCP tools are
+exposed with OpenClaw's bundle-safe tool naming.
+
+To publish/register on ClawHub, use the package workflow from a current
+`clawhub` CLI:
+
+    npm i -g clawhub
+    clawhub login
+    clawhub package publish benteigland11/cartograph-plugin --dry-run
+    clawhub package publish benteigland11/cartograph-plugin
+
+`clawhub package publish` is newer than the legacy skill-only
+`clawhub publish` command. If your local CLI only shows
+`clawhub publish`, update `clawhub` before attempting plugin
+registration.
+
 ## Validate
 
 After editing Codex packaging or shared skill metadata, run:
@@ -182,6 +220,15 @@ the Claude and Codex manifests, and reports any intentional Codex skill
 variants that differ from the base skills. Provider versions are
 independent, so a Codex-only skill change only needs a Codex version
 bump.
+
+After editing OpenClaw-facing bundle metadata, run:
+
+    scripts/validate-openclaw-bundle.sh
+
+That checks the ClawHub package manifest, root bundle marker, Codex
+bundle marker, MCP stdio config, skill metadata, root/Codex skill
+parity, and whether the local OpenClaw and ClawHub CLIs are new enough
+to run the documented live inspection and package publish commands.
 
 ## Quick start
 
