@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Inspect or bump plugin versions across the three host manifests.
+"""Inspect or bump plugin versions across the four host manifests.
 
 Manifests:
-  claude → .claude-plugin/plugin.json
-  codex  → providers/codex/.codex-plugin/plugin.json
-  gemini → gemini-extension.json
+  claude   → .claude-plugin/plugin.json
+  codex    → providers/codex/.codex-plugin/plugin.json
+  gemini   → gemini-extension.json
+  openclaw → openclaw.plugin.json
 
 Usage:
   versions.py                              print a table of current versions
@@ -25,6 +26,7 @@ MANIFESTS = {
     "claude": REPO / ".claude-plugin" / "plugin.json",
     "codex": REPO / "providers" / "codex" / ".codex-plugin" / "plugin.json",
     "gemini": REPO / "gemini-extension.json",
+    "openclaw": REPO / "openclaw.plugin.json",
 }
 
 
@@ -85,7 +87,7 @@ def main() -> int:
     ap.add_argument("--set", dest="set_version", metavar="X.Y.Z", help="set explicit version")
     ap.add_argument(
         "--only",
-        metavar="claude,codex,gemini",
+        metavar="claude,codex,gemini,openclaw",
         help="comma-separated subset of hosts to bump/set (default: all)",
     )
     args = ap.parse_args()
