@@ -28,6 +28,10 @@ Use the headings shown below in your response.
 ### Feature
 Start by defining in 1-2 sentences what the feature is.
 
+### Check Architecture If Exists
+Look to see if there is an existing architecture.mermiad or architect.py script.
+This is your guide for understanding app before trying to plug something in.
+
 ### Candidates
 Use a numbered list for every implementation that is needed to fulfill the request.
 This should be expansive and large. There is no such thing as too much detail.
@@ -70,3 +74,8 @@ Identify which widgets in the current project you will extend, by name, with a 1
 Identify which widgets you intend to install with their installable id from the search. If you intend to extend one, provide a 1-2 sentence explanation.
 
 Identify which widgets will need to be created and propose them in the format: name, domain, language.
+
+### Edit Architecture
+
+Review architecture if exists for any changes that need to be made. If your work causes changes,
+implement them in the architecture and re render the graph. This is also when you should be linkined widgets/blueprints to the architecture.

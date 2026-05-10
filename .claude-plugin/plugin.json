@@ -1,6 +1,6 @@
 {
   "name": "cartograph",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "Widget library manager for AI agents. Search, install, validate, and publish reusable code components across languages and domains.",
   "author": {
     "name": "Ben Teigland",
@@ -9,7 +9,13 @@
   "homepage": "https://github.com/benteigland11/Cartograph",
   "repository": "https://github.com/benteigland11/cartograph-plugin",
   "license": "MIT",
-  "keywords": ["widgets", "code-reuse", "agents", "library", "cartograph"],
+  "keywords": [
+    "widgets",
+    "code-reuse",
+    "agents",
+    "library",
+    "cartograph"
+  ],
   "hooks": {
     "SessionStart": [
       {
@@ -26,7 +32,10 @@
   "mcpServers": {
     "cartograph": {
       "command": "python",
-      "args": ["-m", "cartograph_mcp.server"],
+      "args": [
+        "-m",
+        "cartograph_mcp.server"
+      ],
       "env": {
         "PYTHONPATH": "${CLAUDE_PLUGIN_DATA}/lib"
       }
