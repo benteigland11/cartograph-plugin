@@ -1,7 +1,7 @@
 {
   "name": "cartograph",
   "displayName": "Cartograph",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Stop hard-won logic from disappearing. Cartograph turns project-specific work into hardened widgets that benefit 'future you' and every project that follows.",
   "author": "Ben Teigland",
   "repository": "https://github.com/benteigland11/cartograph-plugin",
@@ -16,7 +16,9 @@
     "${extensionPath}${/}skills${/}cg-plan",
     "${extensionPath}${/}skills${/}cg-config",
     "${extensionPath}${/}skills${/}cg-cloud",
-    "${extensionPath}${/}skills${/}cg-proposals"
+    "${extensionPath}${/}skills${/}cg-proposals",
+    "${extensionPath}${/}skills${/}cg-create",
+    "${extensionPath}${/}skills${/}cg-extract"
   ],
   "contextFileName": "GEMINI.md",
   "categories": [

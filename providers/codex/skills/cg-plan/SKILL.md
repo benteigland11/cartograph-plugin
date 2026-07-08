@@ -1,72 +1,108 @@
 ---
 name: cg-plan
-description: Plan a feature by searching existing widgets and producing an install / improve / create plan. Works per-feature, not per-app. Stops at the plan — does not implement.
+description: >
+  REQUIRED before implementing a feature. Do not freehand domain logic in the app.
+  Decompose one feature into a decisive install / improve / create plan for Cartograph
+  widgets; leave only thin product wiring as glue. Search project cg/ and the registry
+  before proposing anything new. Bias hard against under-extraction: if future work would
+  re-derive this capability, it owns a widget API — today's tight coupling is usually
+  contamination to strip (params, Protocols), not a reason to keep logic in the consumer.
+  Stops at the plan — does not implement. Fires on add/implement/build/feature work,
+  "use cartograph", "cartograph plan", "/cg-plan", and any request that would otherwise
+  invent helpers, services, or domain code from scratch. Does NOT fire for pure docs/chat,
+  cloud/account (cg-cloud), config defaults (cg-config), proposal review (cg-proposals),
+  filling an already-scaffolded widget (cg-create), or extracting an existing in-tree chunk
+  into a widget (cg-extract).
 ---
 
 ## Description
-To implement a feature set, take the time to search through existing widgets and registry ones to make an install, improve, create plan.
+
+Plan how a feature is built with Cartograph **before any implementation**.
+Search first. Decide install / improve / create. Glue is last resort for
+product-specific sequencing only.
 
 ## Activation trigger phrases
+
 - "/cg-plan"
-- "let's add ..."
-- "I want to put in a ..."
-- "go ahead and implement"
+- "use cartograph" / "cartograph plan"
+- "let's add …" / "I want to put in a …"
+- "implement …" / "build …" / "go ahead and implement"
+- any feature request that would invent domain code from scratch
 
 ## What must happen
-1. You must provide clear direction on the install, improve, and create plan with references to widgets.
-2. You must not present optional widgets. Decide if something needs to be included or not.
-3. You must not rely on glue code to get the job done quick.
+
+1. Clear install / improve / create plan with concrete widget references.
+2. No optional widgets. Include or exclude — decide.
+3. No "glue it all in the app for speed." Domain capability goes up into a widget API.
+4. Actually run search (project `cg/` then Cartograph registry). "I don't think anything exists" is not a substitute.
 
 ## Scope
-Plan only one feature at a time. A whole app cannot be broken down into widgets accurately.
-If a user requests a full app, kindly encourage them to narrow it down more so you can effectively plan.
+
+Plan **one feature** at a time. A whole app cannot be broken into widgets accurately.
+If the user asks for a full app, ask them to narrow to a single feature.
 
 ## How to operate
 
 Use the headings shown below in your response.
 
 ### Feature
-Start by defining in 1-2 sentences what the feature is.
+
+Define the feature in 1–2 sentences.
+
+### Check Architecture If Exists
+
+Look for `architect.py` / architecture diagrams if present. Use them only as context
+for how the feature plugs in — architect is not required.
 
 ### Candidates
-Use a numbered list for every implementation that is needed to fulfill the request.
-This should be expansive and large. There is no such thing as too much detail.
-Include a domain and language if it makes sense at this stage.
-Format each entry like: Candidate, domain, language.
+
+Numbered list of every implementation piece needed. Expansive detail.
+Format: `Candidate, domain, language` when known.
 
 ### Classify
-Determine whether the implementation should go in a widget or be glue.
-Two ways to identify if an implementation is for a widget:
 
-1. If doing it from scratch every time would be annoying, make it a widget.
-2. If the implementation would improve with iteration over projects, make it a widget.
+Widget vs glue. **Default bias: widget.** Under-extraction is the failure mode.
 
-Some implementations may look consumer-only but often carry general implementations that should be extracted, with the consumer-specific part left in glue code.
+A piece owns a **widget** when:
 
-Classification information shall be output in a table with all implementations considered.
+1. Re-deriving it from scratch next time would be annoying, **or**
+2. It would improve with iteration across projects, **or**
+3. It is domain capability that should be called through a stable API (policy, parser,
+   transform, retry, auth decision, shape builders, etc.) even if *today's* call site is coupled.
 
-| Implementation | T/F Widget | Reason |
-| -------------- | ---------- | ------ |
-| ex             | T          | one sentence reason |
+**Coupling is not glue.** Project imports, env vars, hardcoded paths, and product types
+are contamination to strip when extracting — not proof the logic should stay in the app.
+Leave only sequencing and product names in glue.
+
+| Implementation | Widget? | Reason |
+| -------------- | ------- | ------ |
+| ex             | T       | one sentence: what API this owns |
 
 ### Search
-For implementations that are for widgets, look through the cg/ directory to determine if there are any widgets that may already satisfy the need.
-Promising ones should have their widget.json and src code read.
-While reading, determine whether it would be appropriate to use or extend the widget. If not, then pass.
 
-If all your needs aren't covered by existing widgets, expand to using a Cartograph search.
-Consider that your implementation might have multiple terms.
-Remember, search is cheap, creating is not.
-If a widget could be installed and extended, you should install it.
+For every widget-classified piece:
 
-For project and registry widgets, widget.json should provide most of the info you need. Use a local read tool or inspect if you need more clarity.
+1. Read promising `cg/` installs (`widget.json` + source).
+2. Cartograph search (multiple query terms). Search is cheap; create is not.
+3. Prefer install + extend over create when a widget covers ≥ a meaningful share of need.
+
+Show what you searched and what you found. Do not invent widget IDs.
 
 ### Improve, Install, Create
 
-Identify which widgets in the current project you will use with no extension needed.
+State each bucket with names/ids:
 
-Identify which widgets in the current project you will extend, by name, with a 1-2 sentence explanation of what.
+- **Use as-is** — installed or to-install, no changes
+- **Improve/extend** — which widget, what changes, why general (not product-specific)
+- **Install** — exact installable id from search
+- **Create** — `name, domain, language` only when search fails
 
-Identify which widgets you intend to install with their installable id from the search. If you intend to extend one, provide a 1-2 sentence explanation.
+### Edit Architecture
 
-Identify which widgets will need to be created and propose them in the format: name, domain, language.
+If architecture files exist and the plan changes structure, note required edits.
+Do not implement them in this skill unless the user asks.
+
+## Stop
+
+End at the plan. Do not scaffold, install, or write feature code unless the user
+explicitly says to execute the plan next.

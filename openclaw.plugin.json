@@ -2,7 +2,7 @@
   "id": "cartograph",
   "name": "Cartograph",
   "description": "Widget library manager for AI agents. Search, install, validate, and publish reusable code components across languages and domains.",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "skills": [
     "./skills"
   ],
