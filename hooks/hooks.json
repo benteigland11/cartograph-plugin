@@ -1,0 +1,17 @@
+{
+  "description": "Cartograph skill-router nudge on every user prompt",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/skills-nudge.sh\"",
+            "timeout": 5,
+            "statusMessage": "Cartograph skills check"
+          }
+        ]
+      }
+    ]
+  }
+}

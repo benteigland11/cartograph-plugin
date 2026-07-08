@@ -4,8 +4,10 @@
 Layout:
   skills/                              canonical, hand-edited
   .mcp.json                            canonical mcp config
+  hooks/                               canonical hooks (skills nudge, etc.)
   providers/codex/skills/              generated, committed (do not hand-edit)
   providers/codex/.mcp.json            generated, committed (do not hand-edit)
+  providers/codex/hooks/               generated, committed (do not hand-edit)
   providers/codex/skills.overrides/    optional per-file overrides for codex
 
 Run with no args to regenerate. Run with --check to verify the committed
@@ -22,9 +24,11 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 ROOT_SKILLS = REPO / "skills"
 ROOT_MCP = REPO / ".mcp.json"
+ROOT_HOOKS = REPO / "hooks"
 CODEX_DIR = REPO / "providers" / "codex"
 CODEX_SKILLS = CODEX_DIR / "skills"
 CODEX_MCP = CODEX_DIR / ".mcp.json"
+CODEX_HOOKS = CODEX_DIR / "hooks"
 CODEX_OVERRIDES = CODEX_DIR / "skills.overrides"
 
 
@@ -47,12 +51,29 @@ def build_skills(target: Path) -> tuple[int, int]:
     return copied, overridden
 
 
+def build_hooks(target: Path) -> int:
+    """Mirror root hooks/ into the codex provider package."""
+    if target.exists():
+        shutil.rmtree(target)
+    if not ROOT_HOOKS.is_dir():
+        return 0
+    shutil.copytree(ROOT_HOOKS, target)
+    # ensure scripts are executable
+    for sh in target.glob("*.sh"):
+        sh.chmod(sh.stat().st_mode | 0o111)
+    return sum(1 for p in target.rglob("*") if p.is_file())
+
+
 def build_mcp(target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT_MCP, target)
 
 
 def trees_equal(a: Path, b: Path) -> bool:
+    if not a.is_dir() and not b.is_dir():
+        return True
+    if not a.is_dir() or not b.is_dir():
+        return False
     cmp = filecmp.dircmp(a, b)
     if cmp.left_only or cmp.right_only or cmp.diff_files or cmp.funny_files:
         return False
@@ -83,36 +104,44 @@ def main() -> int:
     if args.check:
         scratch_skills = REPO / ".sync-codex.skills.check"
         scratch_mcp = REPO / ".sync-codex.mcp.check"
+        scratch_hooks = REPO / ".sync-codex.hooks.check"
         try:
             copied, overridden = build_skills(scratch_skills)
             build_mcp(scratch_mcp)
+            build_hooks(scratch_hooks)
             skills_ok = CODEX_SKILLS.is_dir() and trees_equal(scratch_skills, CODEX_SKILLS)
             mcp_ok = files_equal(scratch_mcp, CODEX_MCP)
+            hooks_ok = trees_equal(scratch_hooks, CODEX_HOOKS) if ROOT_HOOKS.is_dir() else True
         finally:
             if scratch_skills.exists():
                 shutil.rmtree(scratch_skills)
             if scratch_mcp.exists():
                 scratch_mcp.unlink()
-        if not (skills_ok and mcp_ok):
+            if scratch_hooks.exists():
+                shutil.rmtree(scratch_hooks)
+        if not (skills_ok and mcp_ok and hooks_ok):
             drifted = []
             if not skills_ok:
                 drifted.append("providers/codex/skills/")
             if not mcp_ok:
                 drifted.append("providers/codex/.mcp.json")
+            if not hooks_ok:
+                drifted.append("providers/codex/hooks/")
             print(
                 "drift: " + ", ".join(drifted) + " does not match generator output. "
                 "Run scripts/sync-codex.py and commit the result.",
                 file=sys.stderr,
             )
             return 1
-        print(f"ok: {copied} skill files, {overridden} overrides, mcp synced")
+        print(f"ok: {copied} skill files, {overridden} overrides, mcp+hooks synced")
         return 0
 
     copied, overridden = build_skills(CODEX_SKILLS)
     build_mcp(CODEX_MCP)
+    n_hooks = build_hooks(CODEX_HOOKS)
     print(
         f"synced providers/codex/: skills={copied} files, overrides={overridden}, "
-        f".mcp.json mirrored from root"
+        f"hooks={n_hooks} files, .mcp.json mirrored from root"
     )
     return 0
 

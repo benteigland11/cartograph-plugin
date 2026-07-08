@@ -23,6 +23,14 @@ Each host registers the server its own way:
 - **Codex** — `.mcp.json` referenced from `providers/codex/.codex-plugin/plugin.json`
 - **Gemini CLI** — `mcpServers` block in `gemini-extension.json`
 
+**Hooks**
+
+`UserPromptSubmit` injects a one-line reminder to consider Cartograph
+(`cg-*`) skills before freehanding. Implemented for Claude Code (via
+`.claude-plugin/plugin.json`), Grok (via `hooks/hooks.json`), and Codex
+(via `providers/codex/hooks/hooks.json`). Trust the plugin hooks when
+prompted so they can run.
+
 **Skills**
 
 - `cg-plan` drives widget-first decomposition for a feature.

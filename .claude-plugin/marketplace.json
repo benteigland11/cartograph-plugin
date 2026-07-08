@@ -8,7 +8,7 @@
     {
       "name": "cartograph",
       "source": "./",
-      "description": "Widget library manager for AI agents. Ships the Cartograph MCP server (auto-installed) plus four skills: cg-plan, cg-config, cg-cloud, cg-proposals."
+      "description": "Widget library manager for AI agents. Ships Cartograph MCP (auto-install), skills (cg-plan, cg-create, cg-extract, cg-config, cg-cloud, cg-proposals), and a UserPromptSubmit hook that routes work into those skills."
     }
   ]
 }
