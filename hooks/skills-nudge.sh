@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 # Claude / Codex UserPromptSubmit content hook.
 # Reads (and discards) the hook envelope on stdin so the pipe never blocks.
-set -euo pipefail
+# Exit 0 always on success — exit 1 from a broken path/env is what Codex surfaces.
+set -uo pipefail
 cat >/dev/null || true
 
 MSG='Before acting on this request, review available Cartograph (cg-*) skills and use any that apply.'
 
-# Claude Code / Codex: structured inject
+# Fixed string — no python3 (avoids PATH/set -e exit 1 when python is missing).
+# Claude: systemMessage + additionalContext. Codex: additionalContext (and plain text also injects).
 printf '%s\n' "{
-  \"systemMessage\": $(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$MSG"),
+  \"systemMessage\": \"${MSG//\"/\\\"}\",
   \"hookSpecificOutput\": {
     \"hookEventName\": \"UserPromptSubmit\",
-    \"additionalContext\": $(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$MSG")
+    \"additionalContext\": \"${MSG//\"/\\\"}\"
   }
 }"
+exit 0

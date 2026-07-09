@@ -2,7 +2,7 @@
 
 Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — reusable, validated widgets for AI coding agents.
 
-**Version:** 0.1.10  
+**Version:** 0.1.11  
 **Hosts:** Claude Code · Grok · Codex · Gemini CLI · OpenClaw
 
 ---
@@ -115,7 +115,7 @@ Confirm:
 /mcps     → cartograph
 ```
 
-If an older install still shows a UserPromptSubmit cartograph hook: uninstall, reinstall **0.1.10+**, `/hooks` → `r` or new session.
+If an older install still shows a UserPromptSubmit cartograph hook: uninstall, reinstall **0.1.11+**, `/hooks` → `r` or new session.
 
 ### Codex
 
