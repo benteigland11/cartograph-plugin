@@ -2,7 +2,7 @@
 
 Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — reusable, validated widgets for AI coding agents.
 
-**Version:** 0.1.8  
+**Version:** 0.1.9  
 **Hosts:** Claude Code · Grok · Codex · Gemini CLI · OpenClaw
 
 ---
@@ -186,7 +186,7 @@ CLI reference: [Cartograph](https://github.com/benteigland11/Cartograph).
 
 ```text
 skills/                 Shared skill bodies (canonical)
-hooks/                  UserPromptSubmit nudge (Grok + shared)
+hooks/                  UserPromptSubmit: skills-nudge.grok.sh (Grok), skills-nudge.sh (Claude/Codex)
 .claude-plugin/         Claude marketplace + plugin.json (+ SessionStart)
 providers/codex/        Codex package (skills, hooks, .mcp.json)
 .mcp.json               MCP: cartograph-mcp

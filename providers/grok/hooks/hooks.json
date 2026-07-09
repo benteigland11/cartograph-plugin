@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./skills-nudge.sh",
+            "command": "./skills-nudge.grok.sh",
             "timeout": 5,
             "statusMessage": "Cartograph skills check"
           }

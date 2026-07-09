@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./skills-nudge.sh",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/skills-nudge.sh\"",
             "timeout": 5,
             "statusMessage": "Cartograph skills check"
           }

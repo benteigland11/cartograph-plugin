@@ -1,6 +1,6 @@
 {
   "name": "cartograph",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Widget library manager for AI agents. Search, install, validate, and publish reusable code widgets. Ships MCP, skills, and a UserPromptSubmit hook that routes work into cg-* skills.",
   "author": {
     "name": "Ben Teigland",
