@@ -1,6 +1,6 @@
 ---
 name: cg-config
-description: Invoke when the user wants to understand, review, change, or get recommendations for their Cartograph *setup* — the stable preferences that shape every future checkin, search, and install. Fires on "what's my config", "walk me through my setup", "I want X to be the default", "change my settings", "what should my setup be", "how should I configure Cartograph if I want to <intent>", or any intent about defaults/preferences (private widgets by default, switch registries, point Cartograph at a custom engine binary). Does NOT fire when the user wants to take a one-off action on a specific widget. Does NOT fire when the agent just needs to read one config value for its own work — that's a direct MCP tool call.
+description: Invoke when the user wants to understand, review, change, or get recommendations for their Cartograph *setup* — the stable preferences that shape every future checkin, search, and install. Fires on "what's my config", "walk me through my setup", "I want X to be the default", "change my settings", "what should my setup be", "how should I configure Cartograph if I want to <intent>", or any intent about defaults/preferences (private widgets by default, switch registries, point Cartograph at a custom engine binary). Does NOT fire when the user wants to take a one-off action on a specific widget. Does NOT fire when the agent just needs to read one config value for its own work — that's a direct MCP tool call. Does NOT fire for custom validation rules scripts (cg-rules) — rules are the enforce-on-checkin layer, not config keys.
 ---
 
 # cg-config — interpret and recommend Cartograph setup
@@ -223,9 +223,11 @@ One change at a time. Don't batch.
 ## Scope
 
 This skill explains **what the user has configured**. It does not
-teach the end-to-end publishing workflow, proposal review, or
-widget-first planning. If the user moves into those areas, let the
-conversation end cleanly — this skill doesn't follow them there.
+teach the end-to-end publishing workflow, proposal review,
+widget-first planning, or **custom validation rules**. Rules are not
+config keys — they are scripts on validate/checkin; hand to **cg-rules**.
+If the user moves into those areas, let the conversation end cleanly —
+this skill doesn't follow them there.
 
 ## What not to do
 

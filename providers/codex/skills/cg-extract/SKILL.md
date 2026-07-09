@@ -10,7 +10,8 @@ description: >
   in the app. Fires on "/cg-extract", "extract widget", "widgetize", "cartograph-ify",
   "pull into a widget", "this should have been a widget". Does NOT fire for greenfield
   planning (cg-plan), empty-scaffold fill (cg-create), composing a multi-widget
-  feature blueprint (cg-blueprint), or cloud/config/proposals.
+  feature blueprint (cg-blueprint), custom validation rules (cg-rules), or
+  cloud/config/proposals.
 ---
 
 # cg-extract
@@ -58,7 +59,8 @@ Present contamination plan + public API; then scaffold.
 
 ## 5. Validate → checkin → rewire
 
-1. `cg_validate` — fix real failures (stop after two hard loops).  
+1. `cg_validate` — fix real failures (stop after two hard loops). Custom rules run here too.  
 2. `cg_checkin` with reason + bump (minor for new). Publish only if user asks.  
 3. Wire consumer imports; **delete** old inline code; pass project values at call site; run consumer tests.  
-4. Note remaining extract candidates if any.
+4. Note remaining extract candidates if any.  
+5. If extraction revealed a **repo-wide** convention (patterns that must never return as freehand), propose **cg-rules** so validate enforces it next time.

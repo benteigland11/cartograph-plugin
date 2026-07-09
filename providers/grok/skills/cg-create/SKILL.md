@@ -102,6 +102,12 @@ After each file, briefly note what changed and what remains.
 When filled, run **`cg_validate`** (not checkin). Treat failures as design feedback:
 fix code or rethink the surface. Do not suppress warnings to pass.
 
+Custom rules (project/global/org) run as part of validate — `[project]` /
+`[global]` messages are real. Fix the widget or, if the bar itself should change,
+use **cg-rules**. If you discover a durable convention while filling this widget
+(banned pattern, required metadata), **propose encoding it as a rule** so the
+next checkin enforces it automatically.
+
 Only suggest **`cg_checkin`** when validation is clean and the user confirms the
 widget is what they wanted. Checkin is a commitment.
 

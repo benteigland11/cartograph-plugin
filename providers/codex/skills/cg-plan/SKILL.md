@@ -13,7 +13,8 @@ description: >
   invent helpers, services, or domain code from scratch. Does NOT fire for pure docs/chat,
   cloud/account (cg-cloud), config defaults (cg-config), proposal review (cg-proposals),
   filling an already-scaffolded widget (cg-create), composing an agreed blueprint
-  (cg-blueprint), or extracting an existing in-tree chunk into a widget (cg-extract).
+  (cg-blueprint), extracting an existing in-tree chunk into a widget (cg-extract),
+  or authoring custom validation rules (cg-rules).
 ---
 
 ## Description
@@ -120,9 +121,13 @@ State each bucket with names/ids:
   `bp-<name>-<language>` (or installable id), which leaves it composes, one-line
   feature API. Leaves must be install/create first; composition work is
   **cg-blueprint**, not app glue
+- **Rules (optional)** — if this feature reveals a **durable** convention that
+  should block or warn on every future validate/checkin (not a one-widget fix),
+  list it here and hand authoring to **cg-rules**. Prefer rules over hoping the
+  next session remembers AGENTS.md.
 
 ## Stop
 
 End at the plan. Do not scaffold, install, or write feature code unless the user
 explicitly says to execute the plan next. On execute: leaves via create/extract
-as needed; **composition only under cg-blueprint**.
+as needed; **composition only under cg-blueprint**; durable bars via **cg-rules**.

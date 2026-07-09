@@ -140,5 +140,6 @@ create it first — do not skip pins.
 - Filling a single new **widget** scaffold → **cg-create**
 - Lifting existing app modules into **leaves** → **cg-extract**
 - Cloud publish / adopt of a blueprint → **cg-cloud** after local checkin
+- Durable project conventions on what compositions may do → **cg-rules**
 
 Do not freehand a multi-widget feature façade in the app when this skill applies.
