@@ -49,11 +49,6 @@ Use the headings shown below in your response.
 
 Define the feature in 1–2 sentences.
 
-### Check Architecture If Exists
-
-Look for `architect.py` / architecture diagrams if present. Use them only as context
-for how the feature plugs in — architect is not required.
-
 ### Candidates
 
 Numbered list of every implementation piece needed. Expansive detail.
@@ -96,11 +91,6 @@ State each bucket with names/ids:
 - **Improve/extend** — which widget, what changes, why general (not product-specific)
 - **Install** — exact installable id from search
 - **Create** — `name, domain, language` only when search fails
-
-### Edit Architecture
-
-If architecture files exist and the plan changes structure, note required edits.
-Do not implement them in this skill unless the user asks.
 
 ## Stop
 
