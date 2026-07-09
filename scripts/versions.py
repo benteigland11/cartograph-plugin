@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Inspect or bump plugin versions across the four host manifests.
+"""Inspect or bump plugin versions across host manifests.
 
 Manifests:
   claude   → .claude-plugin/plugin.json
+  grok     → .grok-plugin/plugin.json (+ providers/grok/.grok-plugin/plugin.json)
   codex    → providers/codex/.codex-plugin/plugin.json
   gemini   → gemini-extension.json
   openclaw → openclaw.plugin.json
@@ -24,10 +25,16 @@ REPO = Path(__file__).resolve().parent.parent
 
 MANIFESTS = {
     "claude": REPO / ".claude-plugin" / "plugin.json",
+    "grok": REPO / ".grok-plugin" / "plugin.json",
     "codex": REPO / "providers" / "codex" / ".codex-plugin" / "plugin.json",
     "gemini": REPO / "gemini-extension.json",
     "openclaw": REPO / "openclaw.plugin.json",
 }
+
+# Secondary copies kept in sync with grok when present
+GROK_PROVIDER_MANIFEST = (
+    REPO / "providers" / "grok" / ".grok-plugin" / "plugin.json"
+)
 
 
 def read(path: Path) -> tuple[dict, str]:
@@ -43,8 +50,7 @@ def get_version(path: Path) -> str:
 def write_version(path: Path, new_version: str) -> None:
     data, original = read(path)
     data["version"] = new_version
-    indent = 2
-    rendered = json.dumps(data, indent=indent) + ("\n" if original.endswith("\n") else "")
+    rendered = json.dumps(data, indent=2) + ("\n" if original.endswith("\n") else "")
     path.write_text(rendered)
 
 
@@ -68,7 +74,9 @@ def parse_only(value: str | None) -> list[str]:
     requested = [p.strip() for p in value.split(",") if p.strip()]
     unknown = [p for p in requested if p not in MANIFESTS]
     if unknown:
-        raise SystemExit(f"unknown host(s): {', '.join(unknown)}. valid: {', '.join(MANIFESTS)}")
+        raise SystemExit(
+            f"unknown host(s): {', '.join(unknown)}. valid: {', '.join(MANIFESTS)}"
+        )
     return requested
 
 
@@ -87,7 +95,7 @@ def main() -> int:
     ap.add_argument("--set", dest="set_version", metavar="X.Y.Z", help="set explicit version")
     ap.add_argument(
         "--only",
-        metavar="claude,codex,gemini,openclaw",
+        metavar="claude,grok,codex,gemini,openclaw",
         help="comma-separated subset of hosts to bump/set (default: all)",
     )
     args = ap.parse_args()
@@ -116,6 +124,9 @@ def main() -> int:
             new = bump(current, args.bump)
         write_version(path, new)
         print(f"{host}: {current} -> {new}")
+        if host == "grok" and GROK_PROVIDER_MANIFEST.is_file():
+            write_version(GROK_PROVIDER_MANIFEST, new)
+            print(f"grok-provider: -> {new}")
     return 0
 
 

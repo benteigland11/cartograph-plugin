@@ -1,0 +1,22 @@
+{
+  "name": "cartograph",
+  "version": "0.1.8",
+  "description": "Widget library manager for AI agents. Search, install, validate, and publish reusable code widgets. Ships MCP, skills, and a UserPromptSubmit hook that routes work into cg-* skills.",
+  "author": {
+    "name": "Ben Teigland",
+    "url": "https://github.com/benteigland11"
+  },
+  "homepage": "https://github.com/benteigland11/Cartograph",
+  "repository": "https://github.com/benteigland11/cartograph-plugin",
+  "license": "MIT",
+  "keywords": [
+    "widgets",
+    "code-reuse",
+    "agents",
+    "library",
+    "cartograph"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}

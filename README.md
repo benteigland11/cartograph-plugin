@@ -2,7 +2,7 @@
 
 Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — reusable, validated widgets for AI coding agents.
 
-**Version:** 0.1.7  
+**Version:** 0.1.8  
 **Hosts:** Claude Code · Grok · Codex · Gemini CLI · OpenClaw
 
 ---
@@ -77,21 +77,35 @@ Claude starts the MCP server as `python -m cartograph_mcp.server` (with plugin d
 
 ### Grok
 
+Grok uses a **native** package (`.grok-plugin/` + `providers/grok/`), not the Claude layout.
+
 ```bash
-# Marketplace already pointing at this repo, or:
-grok plugin install https://github.com/benteigland11/cartograph-plugin --trust
+pip install -U cartograph-mcp
+
+# Preferred: install the Grok provider package from this monorepo
+grok plugin install benteigland11/cartograph-plugin#providers/grok --trust
+
+# Or whole-repo install (root also has .grok-plugin/plugin.json)
+grok plugin install benteigland11/cartograph-plugin --trust
 ```
 
-Or from the TUI: `/plugins` → Marketplace → install **cartograph** → **trust** hooks when prompted.
+Marketplace (reads `.grok-plugin/marketplace.json` → `providers/grok`):
 
-Update:
+```bash
+grok plugin marketplace add benteigland11/cartograph-plugin
+grok plugin marketplace update
+# then install cartograph from the marketplace UI / CLI and trust hooks
+```
+
+Confirm hooks registered:
 
 ```text
-# TUI: Plugins → update cartograph
-# If git pull fails: dirty local edits in the install dir — reset or reinstall
+/hooks   → look for Plugin source, UserPromptSubmit / skills-nudge
 ```
 
-Require: `pip install cartograph-mcp` so the MCP command on `PATH` works (Grok runs `cartograph-mcp` from `.mcp.json`).
+If hooks are missing after install, reinstall with `--trust` and reload (`/hooks` → `r` or new session).
+
+MCP: `cartograph-mcp` on `PATH` (or the plugin `.mcp.json`).
 
 ### Codex
 
