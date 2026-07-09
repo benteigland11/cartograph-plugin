@@ -1,7 +1,7 @@
 {
   "name": "cartograph",
-  "version": "0.1.9",
-  "description": "Widget library manager for AI agents. Search, install, validate, and publish reusable code widgets. Ships MCP, skills, and a UserPromptSubmit hook that routes work into cg-* skills.",
+  "version": "0.1.10",
+  "description": "Widget library manager for AI agents. Search, install, validate, and publish reusable code widgets. Ships MCP + cg-* skills (Grok: no prompt inject hooks \u2014 skill descriptions are the always-on mode surface).",
   "author": {
     "name": "Ben Teigland",
     "url": "https://github.com/benteigland11"
@@ -17,6 +17,5 @@
     "cartograph"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"
 }

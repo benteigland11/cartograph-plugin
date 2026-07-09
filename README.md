@@ -2,7 +2,7 @@
 
 Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — reusable, validated widgets for AI coding agents.
 
-**Version:** 0.1.9  
+**Version:** 0.1.10  
 **Hosts:** Claude Code · Grok · Codex · Gemini CLI · OpenClaw
 
 ---
@@ -12,10 +12,12 @@ Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — r
 | Piece | Purpose |
 | --- | --- |
 | **MCP server** | Search, install, create, validate, checkin widgets |
-| **Skills** | Judgment workflows (`cg-plan`, `cg-create`, `cg-extract`, …) |
-| **Hooks** | Nudge the agent toward those skills on every prompt |
+| **Skills** | Always-on skill menu + workflows (`cg-plan`, `cg-create`, `cg-extract`, …) |
+| **Hooks** | **Claude / Codex only** — per-prompt skills reminder (where inject works) |
 
-### Skills
+### Skills (every host — primary “Cartograph mode” surface)
+
+Skill **descriptions** are listed every turn. That is how Grok (and all hosts) stay in widget-first mode without freehand free-for-all.
 
 | Skill | When to use it |
 | --- | --- |
@@ -26,14 +28,29 @@ Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — r
 | **cg-cloud** | Publish, governance, registries, login, adopt/sync |
 | **cg-proposals** | Review / accept / reject proposals on widgets you own |
 
-### Hooks
+### Hooks (host-dependent)
 
-| Event | What it does |
+| Host | UserPromptSubmit inject |
 | --- | --- |
-| **UserPromptSubmit** | Injects: *review available Cartograph (`cg-*`) skills and use any that apply* |
-| **SessionStart** (Claude) | Optionally `pip install`s `cartograph-mcp` into plugin data if missing |
+| **Claude Code** | Yes — `additionalContext` / structured JSON via `skills-nudge.sh` |
+| **Codex** | Yes if the host applies hook stdout (ships same Claude-shaped nudge) |
+| **Grok Build** | **No** — harness runs the hook but **ignores stdout** on passive events (official docs). Grok package ships **no hooks** so we don’t fake success. |
 
-**Trust plugin hooks** when the host asks (Grok / Codex `/hooks`). Without trust, hooks do not run.
+**Claude SessionStart** may `pip install` `cartograph-mcp` into plugin data if missing.
+
+---
+
+## Grok: how “always Cartograph” works without inject
+
+Grok’s public hooks contract: only `PreToolUse` uses stdout for decisions; for passive events (including `UserPromptSubmit`), **stdout is ignored**. Probes confirmed `systemMessage`, plain text, and `hookSpecificOutput.additionalContext` all fire successfully and **do not** reach the model.
+
+So the Grok package is **MCP + skills only**:
+
+1. **Strong skill descriptions** (always in the skills menu) — mode gate.
+2. **MCP tools** — daily driver for search/install/create/validate/checkin.
+3. **Optional project rules** (not in the plugin) — for local max, add `.grok/rules/cartograph-mode.md` or a short block in `AGENTS.md` so instructions co-exist with every session in that repo.
+
+Do **not** rely on UserPromptSubmit for Grok mode pressure.
 
 ---
 
@@ -71,41 +88,34 @@ git clone https://github.com/benteigland11/cartograph-plugin
 claude --plugin-dir ./cartograph-plugin
 ```
 
-After edits: `/reload-plugins`.
-
-Claude starts the MCP server as `python -m cartograph_mcp.server` (with plugin data `PYTHONPATH`). First session can auto-install the package via `SessionStart` if it is missing.
+After edits: `/reload-plugins`. Trust hooks when asked (inject works here).
 
 ### Grok
-
-Grok uses a **native** package (`.grok-plugin/` + `providers/grok/`), not the Claude layout.
 
 ```bash
 pip install -U cartograph-mcp
 
-# Preferred: install the Grok provider package from this monorepo
+# Preferred: Grok package only (skills + MCP, no hooks)
 grok plugin install benteigland11/cartograph-plugin#providers/grok --trust
-
-# Or whole-repo install (root also has .grok-plugin/plugin.json)
-grok plugin install benteigland11/cartograph-plugin --trust
 ```
 
-Marketplace (reads `.grok-plugin/marketplace.json` → `providers/grok`):
+Marketplace:
 
 ```bash
 grok plugin marketplace add benteigland11/cartograph-plugin
 grok plugin marketplace update
-# then install cartograph from the marketplace UI / CLI and trust hooks
+# install cartograph from marketplace UI / CLI
 ```
 
-Confirm hooks registered:
+Confirm:
 
 ```text
-/hooks   → look for Plugin source, UserPromptSubmit / skills-nudge
+/plugins  → cartograph enabled, skills listed, hooks count 0
+/skills   → cg-plan, cg-create, cg-extract, …
+/mcps     → cartograph
 ```
 
-If hooks are missing after install, reinstall with `--trust` and reload (`/hooks` → `r` or new session).
-
-MCP: `cartograph-mcp` on `PATH` (or the plugin `.mcp.json`).
+If an older install still shows a UserPromptSubmit cartograph hook: uninstall, reinstall **0.1.10+**, `/hooks` → `r` or new session.
 
 ### Codex
 
@@ -115,20 +125,10 @@ pip install -U cartograph-mcp
 codex plugin marketplace add https://github.com/benteigland11/cartograph-plugin
 # Then install/enable "cartograph" from the plugin picker
 
-# Refresh after we ship updates:
 codex plugin marketplace upgrade cartograph-marketplace
 ```
 
-MCP (if not auto-wired from the plugin):
-
-```bash
-codex mcp add cartograph -- cartograph-mcp
-codex mcp list
-```
-
-Trust the plugin’s **UserPromptSubmit** hook in `/hooks` after install.
-
-Codex loads `providers/codex/` (skills, hooks, `.mcp.json`).
+Trust hooks after install if the host prompts (nudge may inject depending on Codex version).
 
 ### Gemini CLI
 
@@ -137,24 +137,18 @@ pip install -U cartograph-mcp
 gemini extensions install https://github.com/benteigland11/cartograph-plugin
 ```
 
-Registers MCP + skills + `GEMINI.md`.
-
 ### OpenClaw
 
 ```bash
 pip install -U cartograph-mcp
-openclaw plugins install ./cartograph-plugin   # or clone path / published package
+openclaw plugins install ./cartograph-plugin
 openclaw plugins list
 openclaw gateway restart
 ```
 
-Expect bundle format; MCP from root `.mcp.json`.
-
 ---
 
 ## Quick start (after install)
-
-Try:
 
 > I want to add HTTP retries with backoff. What should be widgets?
 
@@ -167,8 +161,6 @@ Try:
 > Finish the scaffold I just created under `cg/…`.
 
 → **cg-create**
-
-Every prompt also gets a short reminder to check `cg-*` skills (if hooks are trusted).
 
 ---
 
@@ -186,29 +178,19 @@ CLI reference: [Cartograph](https://github.com/benteigland11/Cartograph).
 
 ```text
 skills/                 Shared skill bodies (canonical)
-hooks/                  UserPromptSubmit: skills-nudge.grok.sh (Grok), skills-nudge.sh (Claude/Codex)
-.claude-plugin/         Claude marketplace + plugin.json (+ SessionStart)
+hooks/                  Claude/Codex UserPromptSubmit: skills-nudge.sh
+.claude-plugin/         Claude marketplace + SessionStart + nudge
+.grok-plugin/           Grok root manifest (skills + MCP only)
+providers/grok/         Grok package (no hooks/)
 providers/codex/        Codex package (skills, hooks, .mcp.json)
 .mcp.json               MCP: cartograph-mcp
-gemini-extension.json   Gemini
-openclaw.plugin.json    OpenClaw
-scripts/                sync-codex, init-mcp, validators
+scripts/                sync-grok, sync-codex, versions, validators
 ```
 
-Codex tree is generated from root:
-
 ```bash
+python3 scripts/sync-grok.py
 python3 scripts/sync-codex.py
-python3 scripts/sync-codex.py --check
-```
-
----
-
-## Validate packaging
-
-```bash
-scripts/validate-codex-plugin.sh
-scripts/validate-openclaw-bundle.sh
+python3 scripts/versions.py --check
 ```
 
 ---

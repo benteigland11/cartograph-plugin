@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """Regenerate the Grok provider tree from root sources.
 
-Layout (mirrors providers/codex):
+Layout:
   skills/                         canonical
-  hooks/                          canonical (Grok-native relative commands)
   .mcp.json                       canonical
-  .grok-plugin/plugin.json        Grok root manifest
+  .grok-plugin/plugin.json        Grok root manifest (no hooks)
   providers/grok/                 generated, committed
 
-Grok discovers plugins via .grok-plugin/ first (native). Claude keeps
-.claude-plugin/. Install the Grok package with:
+Grok Build does not apply UserPromptSubmit stdout to the model (passive
+hooks: exit 0 only). Do not ship fake inject hooks — mode pressure is
+skill descriptions + MCP.
 
+Install:
   grok plugin install benteigland11/cartograph-plugin#providers/grok --trust
-
-Or add the repo as a marketplace source (reads .grok-plugin/marketplace.json).
 """
 from __future__ import annotations
 
@@ -26,7 +25,6 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 ROOT_SKILLS = REPO / "skills"
-ROOT_HOOKS = REPO / "hooks"
 ROOT_MCP = REPO / ".mcp.json"
 ROOT_MANIFEST = REPO / ".grok-plugin" / "plugin.json"
 GROK_DIR = REPO / "providers" / "grok"
@@ -44,17 +42,6 @@ def build_skills(target: Path) -> int:
     return sum(1 for p in target.rglob("*") if p.is_file())
 
 
-def build_hooks(target: Path) -> int:
-    if target.exists():
-        shutil.rmtree(target)
-    if not ROOT_HOOKS.is_dir():
-        return 0
-    shutil.copytree(ROOT_HOOKS, target)
-    for sh in target.glob("*.sh"):
-        sh.chmod(sh.stat().st_mode | 0o111)
-    return sum(1 for p in target.rglob("*") if p.is_file())
-
-
 def build_mcp(target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT_MCP, target)
@@ -63,6 +50,18 @@ def build_mcp(target: Path) -> None:
 def build_manifest(target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT_MANIFEST, target)
+    # Grok package: never register hooks (convention dir can still load them).
+    data = json.loads(target.read_text())
+    data.pop("hooks", None)
+    # Prefer relative paths under providers/grok
+    data["skills"] = "./skills/"
+    data["mcpServers"] = "./.mcp.json"
+    target.write_text(json.dumps(data, indent=2) + "\n")
+
+
+def remove_hooks_dir() -> None:
+    if GROK_HOOKS.exists():
+        shutil.rmtree(GROK_HOOKS)
 
 
 def trees_equal(a: Path, b: Path) -> bool:
@@ -92,7 +91,7 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    for required in (ROOT_SKILLS, ROOT_MCP, ROOT_MANIFEST, ROOT_HOOKS):
+    for required in (ROOT_SKILLS, ROOT_MCP, ROOT_MANIFEST):
         if not required.exists():
             print(f"error: {required} not found", file=sys.stderr)
             return 2
@@ -104,16 +103,15 @@ def main() -> int:
                 shutil.rmtree(scratch)
             scratch.mkdir()
             n_skills = build_skills(scratch / "skills")
-            n_hooks = build_hooks(scratch / "hooks")
             build_mcp(scratch / ".mcp.json")
             build_manifest(scratch / ".grok-plugin" / "plugin.json")
             ok = (
                 trees_equal(scratch / "skills", GROK_SKILLS)
-                and trees_equal(scratch / "hooks", GROK_HOOKS)
                 and files_equal(scratch / ".mcp.json", GROK_MCP)
                 and files_equal(
                     scratch / ".grok-plugin" / "plugin.json", GROK_MANIFEST
                 )
+                and not GROK_HOOKS.exists()
             )
         finally:
             if scratch.exists():
@@ -125,22 +123,16 @@ def main() -> int:
                 file=sys.stderr,
             )
             return 1
-        print(f"ok: skills={n_skills} hooks={n_hooks} mcp+manifest synced")
+        print(f"ok: skills={n_skills} mcp+manifest, no hooks/")
         return 0
 
     n_skills = build_skills(GROK_SKILLS)
-    n_hooks = build_hooks(GROK_HOOKS)
     build_mcp(GROK_MCP)
     build_manifest(GROK_MANIFEST)
-    # ensure version in generated manifest matches root
-    root_ver = json.loads(ROOT_MANIFEST.read_text()).get("version")
-    data = json.loads(GROK_MANIFEST.read_text())
-    if data.get("version") != root_ver:
-        data["version"] = root_ver
-        GROK_MANIFEST.write_text(json.dumps(data, indent=2) + "\n")
+    remove_hooks_dir()
     print(
-        f"synced providers/grok/: skills={n_skills}, hooks={n_hooks}, "
-        f".mcp.json + .grok-plugin/plugin.json"
+        f"synced providers/grok/: skills={n_skills}, .mcp.json + "
+        f".grok-plugin/plugin.json, hooks removed"
     )
     return 0
 
