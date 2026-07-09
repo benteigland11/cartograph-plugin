@@ -9,7 +9,8 @@ description: >
   Bias against under-extraction: coupling is contamination, not a reason to keep logic
   in the app. Fires on "/cg-extract", "extract widget", "widgetize", "cartograph-ify",
   "pull into a widget", "this should have been a widget". Does NOT fire for greenfield
-  planning (cg-plan), empty-scaffold fill (cg-create), or cloud/config/proposals.
+  planning (cg-plan), empty-scaffold fill (cg-create), composing a multi-widget
+  feature blueprint (cg-blueprint), or cloud/config/proposals.
 ---
 
 # cg-extract

@@ -11,8 +11,9 @@ description: >
   Fires on: right after create succeeds, "finish this widget", "fill in the scaffold",
   "shape this new widget", "what should this widget's API be", "/cg-create". Does NOT
   fire before scaffold exists (run create first). Does NOT fire for feature triage
-  (cg-plan), extracting existing app code (cg-extract), or patching a checked-in
-  library widget.
+  (cg-plan), composing widgets into a multi-widget feature (cg-blueprint — including
+  after blueprint scaffold / blueprint.json), extracting existing app code
+  (cg-extract), or patching a checked-in library widget.
 ---
 
 # cg-create — guide a brand-new widget
@@ -26,14 +27,18 @@ not just something that compiles.
 This is design work, not typing work. Filling TODOs in order without locking
 the public surface first is how bad widgets ship.
 
+**Leaf widgets only.** If the scaffold is a blueprint (`blueprint.json`, id
+`bp-…`), use **cg-blueprint** — do not fill composition here.
+
 ## When this skill applies
 
-- `cg_create` or `cartograph create` just succeeded, **or**
-- A fresh scaffold is on disk and the user wants it finished
+- `cg_create` or `cartograph create` just succeeded for a **widget**, **or**
+- A fresh **widget** scaffold is on disk and the user wants it finished
 
 If the widget directory does not exist yet, stop: run create first, then
 continue here. Do not improvise extraction of existing app code — that is
-`cg-extract`.
+`cg-extract`. Do not freehand multi-widget feature façades — that is
+`cg-blueprint`.
 
 ## Scope
 

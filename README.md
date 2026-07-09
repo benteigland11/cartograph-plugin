@@ -2,7 +2,7 @@
 
 Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — reusable, validated widgets for AI coding agents.
 
-**Version:** 0.1.11  
+**Version:** 0.1.14  
 **Hosts:** Claude Code · Grok · Codex · Gemini CLI · OpenClaw
 
 ---
@@ -11,8 +11,8 @@ Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — r
 
 | Piece | Purpose |
 | --- | --- |
-| **MCP server** | Search, install, create, validate, checkin widgets |
-| **Skills** | Always-on skill menu + workflows (`cg-plan`, `cg-create`, `cg-extract`, …) |
+| **MCP server** | Search, install, create, validate, checkin widgets and blueprints |
+| **Skills** | Always-on skill menu + workflows (`cg-plan`, `cg-create`, `cg-blueprint`, …) |
 | **Hooks** | **Claude / Codex only** — per-prompt skills reminder (where inject works) |
 
 ### Skills (every host — primary “Cartograph mode” surface)
@@ -21,8 +21,9 @@ Skill **descriptions** are listed every turn. That is how Grok (and all hosts) s
 
 | Skill | When to use it |
 | --- | --- |
-| **cg-plan** | Before implementing a feature — install / improve / create plan |
-| **cg-create** | After `create` scaffolds a widget — design API, fill, validate |
+| **cg-plan** | Before implementing a feature — leaves + optional blueprint; install / improve / create |
+| **cg-create** | After `create` scaffolds a **widget** — design API, fill, validate |
+| **cg-blueprint** | Compose widgets into a reusable multi-widget **feature** (`bp-…`) |
 | **cg-extract** | Existing or freehanded app code → widgets (onboard / recover) |
 | **cg-config** | Defaults, profiles, “how should I set Cartograph up?” |
 | **cg-cloud** | Publish, governance, registries, login, adopt/sync |
