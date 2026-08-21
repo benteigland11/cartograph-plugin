@@ -57,7 +57,7 @@ Prefer MCP when available:
 | ---- | --------- |
 | Search leaves & blueprints | registry search / `cartograph search` |
 | Scaffold blueprint | `cg_blueprint` action create, or `cg_create` with `is_blueprint=true` / `cartograph blueprint create <slug> --language …` |
-| Pin a leaf | `cg_blueprint` add-dep / `cartograph blueprint add-dep <widget_id>` (widget must be installed) |
+| Pin a leaf | `cg_blueprint` add-dep / `cartograph blueprint add-dep <widget_id> --path <blueprint_dir>` (widget must be installed). Pin-only; does not full-validate. |
 | Unpin | remove-dep |
 | Validate / checkin | `cg_validate` / `cg_checkin` (same as widgets) |
 
@@ -109,14 +109,19 @@ placeholder tags fail validation.
 
 ### 5. Pin dependencies
 
-For each leaf, ensure it is installed under `cg/`, then:
+For each leaf, ensure it is installed under `cg/`, then from the **project
+root**:
 
 ```text
 cartograph blueprint add-dep <widget_id> --path <blueprint_dir>
 ```
 
-Pins the **installed** version. No ranges. If a leaf is missing, install or
-create it first — do not skip pins.
+Pins the **installed** version. No ranges. Does **not** run the full
+blueprint validator (checkin does). Pin every leaf before writing
+composition imports; contamination blocks undeclared `cg/` imports in
+`src/`. If a leaf is missing, install or create it first — do not skip
+pins. `--validate` exists to re-prove a finished blueprint after a pin
+and will revert on failure; do not use it on a scaffold.
 
 ### 6. Implement composition only
 
