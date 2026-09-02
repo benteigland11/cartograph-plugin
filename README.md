@@ -2,8 +2,8 @@
 
 Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — reusable, validated widgets for AI coding agents.
 
-**Version:** 0.1.18  
-**Hosts:** Claude Code · Grok · Codex · Gemini CLI · OpenClaw
+**Version:** 0.1.19  
+**Hosts:** Claude Code · Grok · Codex · Gemini CLI · OpenClaw · Antigravity
 
 ---
 
@@ -137,6 +137,13 @@ Trust hooks after install if the host prompts (nudge may inject depending on Cod
 ```bash
 pip install -U cartograph-mcp
 gemini extensions install https://github.com/benteigland11/cartograph-plugin
+```
+
+### Antigravity
+
+```bash
+pip install -U cartograph-mcp
+agy plugin install https://github.com/benteigland11/cartograph-plugin
 ```
 
 ### OpenClaw

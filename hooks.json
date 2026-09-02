@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/skills-nudge.sh\"",
+            "commandWindows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"`$msg = 'Before acting on this request, review available Cartograph (cg-*) skills and use any that apply.'; `$payload = [ordered]@{ systemMessage = `$msg; hookSpecificOutput = [ordered]@{ hookEventName = 'UserPromptSubmit'; additionalContext = `$msg } }; `$payload | ConvertTo-Json -Depth 5 -Compress; exit 0\"",
+            "timeout": 5,
+            "statusMessage": "Cartograph skills check"
+          }
+        ]
+      }
+    ]
+  }
+}

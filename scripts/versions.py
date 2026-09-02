@@ -29,11 +29,15 @@ MANIFESTS = {
     "codex": REPO / "providers" / "codex" / ".codex-plugin" / "plugin.json",
     "gemini": REPO / "gemini-extension.json",
     "openclaw": REPO / "openclaw.plugin.json",
+    "antigravity": REPO / "plugin.json",
 }
 
 # Secondary copies kept in sync with grok when present
 GROK_PROVIDER_MANIFEST = (
     REPO / "providers" / "grok" / ".grok-plugin" / "plugin.json"
+)
+CODEX_PROVIDER_AGENTS_MANIFEST = (
+    REPO / "providers" / "codex" / "plugin.json"
 )
 
 
@@ -127,6 +131,9 @@ def main() -> int:
         if host == "grok" and GROK_PROVIDER_MANIFEST.is_file():
             write_version(GROK_PROVIDER_MANIFEST, new)
             print(f"grok-provider: -> {new}")
+        if host == "antigravity" and CODEX_PROVIDER_AGENTS_MANIFEST.is_file():
+            write_version(CODEX_PROVIDER_AGENTS_MANIFEST, new)
+            print(f"antigravity-provider: -> {new}")
     return 0
 
 

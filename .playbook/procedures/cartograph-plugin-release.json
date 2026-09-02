@@ -1,0 +1,33 @@
+{
+  "id": "cartograph-plugin-release",
+  "title": "Cartograph plugin release",
+  "description": "SPECIFIC to the Cartograph agent plugin (cartograph-plugin). How to ship a skill or manifest change as a new 0.1.x: edit canonical skills/, mirror grok and codex copies, bump every host via scripts/versions.py, keep README in lockstep, PR squash-merge to main, copy the skill into the local Grok install. Do not bump cartograph-mcp unless the CLI flags agents actually pass have changed. Does not cover cartograph-cli PyPI.",
+  "tags": [
+    "cartograph",
+    "plugin",
+    "release",
+    "skills"
+  ],
+  "steps": [
+    {
+      "id": "661aced9a89849419d9165aea3330831",
+      "title": "Edit canonical skill only",
+      "do": "Change skills/<name>/SKILL.md in cartograph-plugin. That file is the source. Do not hand-edit provider copies first. Leave unrelated dirty skills (for example cg-rules WIP) unstaged."
+    },
+    {
+      "id": "e15ef5ee8ae54f1caece946e46de1578",
+      "title": "Mirror grok and codex copies",
+      "do": "Copy the canonical SKILL.md to providers/grok/skills/<name>/ and providers/codex/skills/<name>/. Prefer that one-file copy when other skills are dirty. Full `scripts/sync-grok.py` / `scripts/sync-codex.py` rebuilds every skill and would mix WIP. Also copy into ~/.grok/installed-plugins/grok-*/skills/<name>/SKILL.md so the current Grok session sees it."
+    },
+    {
+      "id": "b52ddcb631f146deb5a22eebbe7d9cd5",
+      "title": "Bump every host together",
+      "do": "`python3 scripts/versions.py --bump patch` then `python3 scripts/versions.py --check`. That writes Claude, Grok, Grok provider, Codex, Gemini, and OpenClaw. Set README **Version:** to the same number (it has drifted before). Do not bump cartograph-mcp for a skill-only or CLI-default change: agents already omit extra flags."
+    },
+    {
+      "id": "90f46948b2bb48549433bf03bae0cef7",
+      "title": "Stage only the release files",
+      "do": "Add canonical skill, the two provider copies, host manifests, and README. `git status` first: leave other modified skills unstaged. Commit on a feature branch, push, squash-merge the PR to main. Fast-forward the local main checkout after merge."
+    }
+  ]
+}

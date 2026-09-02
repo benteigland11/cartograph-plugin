@@ -1,18 +1,24 @@
 ---
 name: cg-rules
 description: >
-  REQUIRED when encoding durable conventions into Cartograph custom validation
-  rules — the highest-leverage harness control for agents. Custom rules are
-  per-language scripts that run on every validate/checkin and can only *tighten*
-  the bar (blocks hard-fail; warnings soft). Prefer rules over AGENTS.md/chat
-  memory for anything that must not ship again. Fire when: user names a
-  convention to enforce, a repeated freehand mistake should never recur, a
-  project/team standard is real but not in the engine floor, "add a validation
-  rule", "ban X on checkin", "/cg-rules", or after plan/create/extract when a
-  durable bar is clear. Also fire proactively when the same correction appears
-  twice — propose a rule. Layers: project + global + org all run if present
-  (merged). Does NOT fire for one-off widget fixes, engine library_notes,
-  config keys (cg-config), or cloud/governance (cg-cloud).
+  REQUIRED when durable project conventions for widgets should become hard memory on every
+  validate/checkin — the highest-leverage self-healing harness for agents.
+  Custom rules are per-language programs under .cartograph/rules/ (open canvas:
+  full FS/AST, conditional if-A-then-B, cross-file widget contracts, and when
+  needed project/app call sites and configs — not only import bans). They only
+  *tighten* the bar (blocks hard-fail; warnings soft). Prefer rules over
+  AGENTS.md/chat for anything that must not ship again inside widgets and blueprints. Fire when ANY of:
+  user names a never/always convention ("we don't use X", "always require Y",
+  "add a validation rule", "ban X on checkin", "/cg-rules"); user corrects a
+  shipping convention once; you fixed a pattern that must not recur on future
+  widgets; plan/create/extract/blueprint/checkin made a repo-wide bar clear;
+  validate failed for something that is really project policy; the session
+  taught "don't forget this is bad" or "enforce these things." Propose and
+  encode as soon as the bar is durable and mechanically checkable — do not
+  wait for the same mistake twice; unfinished work if only a soft note remains.
+  Layers: project + global + org all run if present (merged). Does NOT fire for
+  one-off widget bugs, taste nits, engine library_notes, config keys
+  (cg-config), or cloud/governance (cg-cloud).
 ---
 
 # cg-rules — turn judgment into enforced guarantees
@@ -22,15 +28,22 @@ contamination, tests, timeouts). The floor cannot be lowered. Rules only add
 checks. Once present, they run automatically on `cartograph validate` and
 `cartograph checkin` — nothing special to invoke.
 
-For agents this is the hard harness:
+For agents this is the hard harness — and a **general program**, not a tiny
+linter preset:
 
 | Soft (forgets) | Hard (enforces) |
 | -------------- | --------------- |
 | AGENTS.md / chat | Script on every validate/checkin |
-| “Remember we don’t use pickle” | `blocks` when pickle appears in `src/` |
+| “Remember we don’t do X” | `blocks`/`warnings` from whatever the script can prove locally |
+| “Callers must also set Y” | Rule walks app + widget and fails checkin when the companion is missing |
 
 **Bias:** if a convention is real and durable, encode it as a rule. Do not only
-fix one widget and hope the next session remembers.
+fix one widget and hope the next session remembers. Soft memory forgets; this
+skill is how the project says “don’t forget.”
+
+**Completion criterion:** when a session taught a durable never/always for the
+repo, the work is unfinished until you either (1) merge a project rule, or
+(2) explicitly decide it is one-off only. Silence is not a decision.
 
 Rules are **not retroactive**: already-stamped widgets keep their stamp. The new
 bar applies the next time something is validated or checked in.
@@ -125,13 +138,103 @@ run_all_rules(widget_path, language)
   failure (broken rules break checkin — treat rules as production code).
 - Cartograph prefixes each message with `[project]` / `[global]` / `[org]`.
 
-`widget_path` is the widget (or blueprint) directory under validation. Inspect
-with normal FS/AST tools:
+`widget_path` is the widget (or blueprint) directory under validation. That is
+the **primary** argument — not a cage. There is no special Cartograph API
+inside the script: it is a normal program with a filesystem, AST libraries,
+JSON parsers, and whatever the runner language can do **locally**.
 
-- `widget.json` or `blueprint.json`
-- `src/`, `tests/`, `examples/`
+---
 
-No special Cartograph API inside the script.
+## How far rules can reach (open canvas)
+
+Rules are **not** a small ban-list DSL. They are a **wide-open validation
+script** the project owns. Anything you can check deterministically from that
+process can become a block or warning. Think “custom CI for this language’s
+widgets,” not “three template examples.”
+
+### 1. Inside the widget (default surface)
+
+Walk and parse freely:
+
+| Surface | Examples of enforceable bars |
+| ------- | ---------------------------- |
+| `widget.json` / `blueprint.json` | required fields, tag combinations, dependency pins, display metadata shape |
+| `src/` | banned APIs, required exports, architecture shape, domain invariants |
+| `tests/` / `examples/` | required scenarios, naming, “must exercise public API X” |
+| Cross-file inside the widget | if metadata says A, source/tests must do B; if file pattern X exists, companion Y must exist |
+
+**Conditional policy is first-class:** “if *this*, then *that*” — tags, domains,
+filenames, imports, symbols, options in source — not only global bans.
+
+### 2. Across the widget’s own contracts
+
+Rules can couple surfaces the engine does not:
+
+- Manifest ↔ source (declared capability must appear in implementation)
+- Source ↔ tests/examples (public surface must be demonstrated)
+- Dependency list ↔ actual imports/usage
+- Blueprint deps ↔ composition code that wires them
+
+If two facts in the widget must stay consistent, a rule can own that invariant.
+
+### 3. Into the app / project (yes — intentionally)
+
+The script receives `widget_path` and runs with `cwd = widget_path`, but it is
+**not sandboxed to that directory**. It can resolve the project root (e.g.
+walk parents until `.cartograph/` or `.git/`), then inspect **application**
+code, configs, and call sites.
+
+That is how rules enforce product-level memory, not only widget hygiene:
+
+| Reach | What becomes enforceable |
+| ----- | ------------------------ |
+| App call sites | If app code invokes a certain widget API / symbol, require companion setup nearby (init, error handling, config flag, matching resource, etc.) |
+| Project config | Widget or tag implies a required setting in app config, IaC, or build files |
+| Monorepo layout | Widgets under a path must satisfy package/boundary rules the app relies on |
+| Multi-artifact consistency | When this widget is present/installed, some other tree in the repo must contain a matching declaration |
+
+**Use app reach when the durable bar is about how the product uses widgets**,
+not when a pure widget-local check would suffice. Prefer stable relative
+discovery from project root over machine-specific absolute paths.
+
+### 4. How open is “open”?
+
+Practically endless within the harness constraints:
+
+- Full language AST / regex / custom parsers
+- Multi-file graph walks
+- Reading sibling packages, `cg/` installs, app `src/`, manifests, schemas
+- Encoding **team design law** that library_notes will never know about
+
+The floor (coverage, contamination, timeouts) stays universal. Everything
+**above** that is yours. Templates show tiny bans only so the I/O contract is
+obvious — they are not the ceiling.
+
+### 5. Still required: good rule hygiene
+
+Open canvas ≠ anything goes at runtime:
+
+| Do | Don’t |
+| -- | ----- |
+| Deterministic, local, ≤30s | Network, flaky clocks, interactive prompts |
+| Actionable messages (what + where + how to fix) | Opaque “failed policy 7” |
+| Prefer structure/AST when practical | Fragile whole-repo string spam that breaks constantly |
+| Scope checks to durable project law | One widget_id special-case or pure taste |
+| Fail closed on broken rules scripts | Rely on casual `--override-warnings` for real bars |
+
+If a check is valuable but slow, narrow the walk (e.g. only `src/` and
+known app roots) rather than abandoning the bar.
+
+### 6. Bias when choosing reach
+
+1. **Widget-local** if the invariant lives entirely in the module under checkin  
+2. **Cross-surface inside the widget** for if-A-then-B metadata/source/test laws  
+3. **Project/app reach** when the lesson was “callers / product must also …”  
+4. Still prefer **project** layer for repo law; **global** only for personal
+   machine-wide agent bars
+
+Agents should **propose ambitious rules** when the user states a real product
+invariant — not shrink every idea to “ban this import.”
 
 ---
 
@@ -211,13 +314,21 @@ what teammates will load.
 
 ## When this skill applies
 
-- User wants to enforce / ban / require something on future widgets
-- Same class of mistake corrected more than once
-- Onboarding: “keep quality without re-explaining every session”
-- After plan/create/extract/blueprint, a **durable** bar is clear
+Fire mid-work — not only when the user says “add a rule”:
 
-Skip: one widget bug (fix that widget); changing engine floor (not a rule);
-config keys (**cg-config**); org policy files you don’t own.
+- User wants to enforce / ban / require something on future widgets
+- User corrects a shipping convention **once** (“we don’t use X”, “always Y”)
+- You fixed a pattern that should never ship again in this repo
+- Onboarding: “keep quality without re-explaining every session”
+- After plan / create / extract / blueprint / checkin, a **durable** bar is clear
+- Validate/checkin failed for a judgment that is really **project policy**
+- Session insight: “don’t forget this pattern is bad” / “enforce these things”
+
+**Do not wait for the same mistake twice.** Once the bar is durable and
+checkable, propose and encode (or get a quick confirm if scope is ambiguous).
+
+Skip: one widget bug (fix that widget); pure taste; changing engine floor
+(not a rule); config keys (**cg-config**); org policy files you don’t own.
 
 ---
 
@@ -275,11 +386,20 @@ shows nothing (rare).
 6. Prefer AST/structure over fragile whole-file string bans when practical.
 7. `write` **full** file with `--confirm` if overwriting.
 
-Good targets: banned imports/APIs, required metadata fields, domain-specific
-shape, example constraints, “never freehand pattern X again.”
+**Good targets (think in levels of reach):**
 
-Bad targets: waiving coverage/contamination; one-off widget_id checks; pure
-taste spam; slow full re-test harnesses unless the user asked for that policy.
+- **Local:** banned imports/APIs; required exports; file layout; example must run a path  
+- **Conditional:** if tag/option/symbol A, then field/file/test B must hold  
+- **Cross-surface:** manifest claims must match source; public API must have tests/examples  
+- **App/project:** call-site or config companions when a widget API is used; repo-wide
+  co-requirements that soft docs keep losing  
+
+If it is durable, mechanical, and expensive to re-derive next session — it is
+in scope. The canvas is the whole program you write.
+
+**Bad targets:** waiving coverage/contamination; one-off widget_id vanity
+checks; pure taste spam; unbounded “scan the entire monorepo with no root
+bound” unless narrowed; network or non-deterministic oracles.
 
 ### 5. Prove it
 
@@ -299,15 +419,25 @@ When validate prints `[project]` / `[global]` / `[org]` failures: fix the widget
 
 ---
 
-## Proactive use
+## Proactive use (background duty while working)
 
-During **cg-plan / cg-create / cg-extract / cg-blueprint**, if you learn a
-recurring standard, **propose a rule in the same breath as the fix**. Ask to
-encode it. That is using the harness: the next session inherits the bar without
-re-deriving it.
+Rules are a **live memory surface**, not a separate mode. While doing other
+Cartograph work:
 
-Do not spam rules for taste. Use them for **recurring, enforceable, durable**
-bars.
+| Moment | Action |
+| ------ | ------ |
+| User corrects a convention | Offer/encode project rule immediately if durable |
+| You just fixed a class of shipping mistake | Encode so the next agent cannot reintroduce it |
+| cg-plan lists a durable bar | Author it (or leave explicit “none”) before calling the plan done |
+| cg-create / extract / blueprint closeout | “Rules impact: add X” or “none because one-off” |
+| About to checkin after a hard-won lesson | 10s: new bar? inventory + merge if yes |
+
+Propose a rule **in the same breath as the fix**. That is the self-healing
+loop: the next session inherits the bar without re-deriving it.
+
+Do not spam rules for taste. Use them for **enforceable, durable** bars.
+When in doubt on block vs warning: **block** for must-not-ship, **warn** for
+usually-wrong.
 
 ---
 
