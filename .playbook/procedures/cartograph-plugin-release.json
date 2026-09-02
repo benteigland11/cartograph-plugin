@@ -22,7 +22,7 @@
     {
       "id": "b52ddcb631f146deb5a22eebbe7d9cd5",
       "title": "Bump every host together",
-      "do": "`python3 scripts/versions.py --bump patch` then `python3 scripts/versions.py --check`. That writes Claude, Grok, Grok provider, Codex, Gemini, and OpenClaw. Set README **Version:** to the same number (it has drifted before). Do not bump cartograph-mcp for a skill-only or CLI-default change: agents already omit extra flags."
+      "do": "`python3 scripts/versions.py --bump patch` then `python3 scripts/versions.py --check`. That writes Claude, Grok, Grok provider, Codex, Gemini, OpenClaw, and Antigravity. Set README **Version:** to the same number (it has drifted before). Do not bump cartograph-mcp for a skill-only or CLI-default change: agents already omit extra flags."
     },
     {
       "id": "90f46948b2bb48549433bf03bae0cef7",
