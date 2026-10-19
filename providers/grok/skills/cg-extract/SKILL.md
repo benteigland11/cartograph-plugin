@@ -53,7 +53,7 @@ Present contamination plan + public API; then scaffold.
 ## 4. Scaffold + implement
 
 1. `cg_create` / `cartograph create <slug> --domain … --language …` (slug only).  
-2. **Read `library_notes` first** (general/language/domain). Do not edit them. Follow while coding.  
+2. **Read `library_notes` first** (general/language/domain) in widget.json, or `cartograph notes <widget dir>`. Never edit them: Cartograph restores them on every validate and checkin. Follow while coding.  
 3. `src/` — domain-shaped API, no project names, strip contamination.  
 4. tests/examples — isolated, fake data, no network; follow language notes.
 
