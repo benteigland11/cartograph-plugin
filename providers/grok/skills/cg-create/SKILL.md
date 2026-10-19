@@ -49,13 +49,15 @@ unrelated features or "while we're here" siblings.
 
 Before suggesting anything, read the scaffold:
 
-1. **`widget.json` → `library_notes` (required, first).** Cartograph injects
-   engine rules here: `general`, `language`, and sometimes `domain`. These are
-   the constraints validation will enforce (coverage, tests, contamination,
-   examples, deps, language-specific bans). **Read them fully and design/implement
-   to comply before you write code.** Do not edit `library_notes` — it is managed
-   by Cartograph and restored on checkin. Put agent/project notes in
-   `custom_notes` if needed.
+1. **`widget.json` → `library_notes` (required, first).** Cartograph writes
+   its engine rules here: `general`, `language`, and sometimes `domain`
+   (`cartograph notes <widget dir>` prints the same text). These are the
+   constraints validation will enforce (coverage, tests, contamination,
+   examples, deps, language-specific bans). **Read them fully and
+   design/implement to comply before you write code.** Never edit
+   `library_notes`: Cartograph overwrites the field with its current text on
+   every validate and checkin, so an edit never survives. Put agent/project
+   notes in `custom_notes` if needed.
 2. Rest of `widget.json` — every `[TODO: ...]` is a real decision (tags, description, etc.).
 3. `src/` — including scaffold guidance comments.
 4. Tests — what shape the scaffolder set up.
