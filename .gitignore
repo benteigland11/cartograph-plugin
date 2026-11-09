@@ -3,3 +3,6 @@
 *.swo
 .idea/
 .vscode/
+.claude/settings.local.json
+.codex
+.playbook/procedures/.index.json
