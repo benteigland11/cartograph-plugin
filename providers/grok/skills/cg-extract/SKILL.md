@@ -48,6 +48,17 @@ Map deps; plan the clean surface:
 - third-party → `tech_stack.dependencies`  
 - project imports / env / hardcodes / product types → params, Protocols, or widget-local types  
 
+Declare every third-party import used in `src/` in `widget.json` before validating
+or checking in, or expect a hard contamination block. An import is unlisted when
+it is not stdlib, not a declared dependency, and not the widget's own module or
+package (for Java and C#, packages and namespaces declared in `src/` count as
+own everywhere, so scaffolded tests stay clean). The block has no
+`--override-warnings` escape. It already applies to Python, JavaScript/Angular,
+Nim, Blender, KiCad, and PHP with composer autoload; cartograph-cli 0.7.28 adds
+Go, Java, C#, Flutter, Rust, and Lean. Unlisted imports in `tests/` and
+`examples/` still warn, and PHP without composer autoload still warns. Fix a
+block by declaring the dependency or removing the import.
+
 Present contamination plan + public API; then scaffold.
 
 ## 4. Scaffold + implement
