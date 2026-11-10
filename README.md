@@ -2,7 +2,7 @@
 
 Agent plugin for [Cartograph](https://github.com/benteigland11/Cartograph) — reusable, validated widgets for AI coding agents.
 
-**Version:** 0.1.19  
+**Version:** 0.1.20  
 **Hosts:** Claude Code · Grok · Codex · Gemini CLI · OpenClaw · Antigravity
 
 ---
